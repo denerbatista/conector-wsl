@@ -35,21 +35,21 @@ Conector MCP local para usar terminal e filesystem do WSL dentro do Claude Deskt
 Rode no WSL:
 
 ```bash
-cd /home/denerbatista/projetos/my-projects/conector-wsl
+cd /home/SEU_USUARIO/projetos/conector-wsl
 npm install
 ```
 
 ## Rodar localmente
 
 ```bash
-cd /home/denerbatista/projetos/my-projects/conector-wsl
+cd /home/SEU_USUARIO/projetos/conector-wsl
 node ./server/index.js
 ```
 
 ## Gerar o bundle para compartilhar
 
 ```bash
-cd /home/denerbatista/projetos/my-projects/conector-wsl
+cd /home/SEU_USUARIO/projetos/conector-wsl
 npm run package
 ```
 
@@ -59,8 +59,8 @@ Isso gera o arquivo `conector-wsl.mcpb`, que pode ser aberto no Claude Desktop p
 
 Abra o arquivo `conector-wsl.mcpb` no Claude Desktop e preencha:
 
-- `Diretorio inicial`: caminho Linux/WSL inicial. Exemplo: `/home/denerbatista`
-- `Diretorios liberados`: caminhos Linux/WSL permitidos, separados por `:`
+- `Diretorio inicial`: caminho Linux/WSL inicial. Exemplo: `/home/SEU_USUARIO`
+- `Diretorios liberados`: caminhos Linux/WSL permitidos, separados por `:`. Exemplo: `/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS`
 - `Distribuicao WSL`: nome da distro. Exemplo: `Ubuntu-24.04`
 
 Depois disso, o conector aparece em `Conectores` como `WSL Workspace Connector`.
@@ -80,21 +80,23 @@ Exemplo:
       "command": "C:\\Windows\\System32\\wsl.exe",
       "args": [
         "-d",
-        "Ubuntu-24.04",
+        "SUA_DISTRO_WSL",
         "--",
         "node",
-        "/home/denerbatista/projetos/my-projects/conector-wsl/server/index.js"
+        "/home/SEU_USUARIO/projetos/conector-wsl/server/index.js"
       ],
       "env": {
-        "WSL_CONNECTOR_DEFAULT_CWD": "/home/denerbatista",
-        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/denerbatista:/mnt/c/Users/DenerBatista",
-        "WSL_CONNECTOR_DISTRO": "Ubuntu-24.04",
+        "WSL_CONNECTOR_DEFAULT_CWD": "/home/SEU_USUARIO",
+        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS",
+        "WSL_CONNECTOR_DISTRO": "SUA_DISTRO_WSL",
         "WSL_CONNECTOR_TIMEOUT_MS": "120000"
       }
     }
   }
 }
 ```
+
+Troque `SEU_USUARIO`, `SEU_USUARIO_WINDOWS` e `SUA_DISTRO_WSL` pelos valores reais de cada pessoa.
 
 Esse modo manual nao depende da UI de conectores e foi o caminho mais confiavel para o Cowork nas validacoes feitas neste projeto.
 

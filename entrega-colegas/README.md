@@ -31,15 +31,17 @@ Fluxo:
 
 ## Exemplo de instalacao
 
-Se o projeto foi clonado em `/home/alice/projetos/conector-wsl` e a distro e `Ubuntu-24.04`:
+Se o projeto foi clonado em `/home/SEU_USUARIO/projetos/conector-wsl` e a distro e `Ubuntu-24.04`:
 
 ```powershell
 .\instalar-mcp-manual.ps1 `
   -DistroName 'Ubuntu-24.04' `
-  -LinuxProjectPath '/home/alice/projetos/conector-wsl' `
-  -DefaultCwd '/home/alice' `
-  -AllowedRoots '/home/alice:/mnt/c/Users/Alice'
+  -LinuxProjectPath '/home/SEU_USUARIO/projetos/conector-wsl' `
+  -DefaultCwd '/home/SEU_USUARIO' `
+  -AllowedRoots '/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS'
 ```
+
+Troque `SEU_USUARIO` e `SEU_USUARIO_WINDOWS` pelos valores reais de cada pessoa.
 
 O script detecta automaticamente o arquivo correto do Claude Desktop:
 
