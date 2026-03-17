@@ -1,0 +1,119 @@
+{
+  "manifest_version": "0.2",
+  "name": "claude-wsl-terminal-connector",
+  "display_name": "WSL Workspace Connector",
+  "version": "0.2.0",
+  "description": "Expose terminal e filesystem do WSL para o Claude Desktop/Cowork via MCP.",
+  "author": {
+    "name": "Dener Batista"
+  },
+  "keywords": [
+    "claude",
+    "cowork",
+    "filesystem",
+    "mcp",
+    "terminal",
+    "wsl"
+  ],
+  "homepage": "https://claude.ai",
+  "license": "MIT",
+  "compatibility": {
+    "platforms": [
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "tools": [
+    {
+      "name": "connector_status",
+      "description": "Mostra o status da configuracao ativa do conector."
+    },
+    {
+      "name": "list_allowed_roots",
+      "description": "Lista os caminhos liberados para terminal e filesystem."
+    },
+    {
+      "name": "list_directory",
+      "description": "Lista o conteudo de um diretorio permitido."
+    },
+    {
+      "name": "get_path_info",
+      "description": "Mostra tipo, tamanho e datas de um caminho permitido."
+    },
+    {
+      "name": "read_text_file",
+      "description": "Le o conteudo de um arquivo de texto no WSL."
+    },
+    {
+      "name": "write_text_file",
+      "description": "Escreve um arquivo de texto no WSL."
+    },
+    {
+      "name": "create_directory",
+      "description": "Cria um diretorio dentro das roots permitidas."
+    },
+    {
+      "name": "run_wsl_command",
+      "description": "Executa um comando avulso no WSL."
+    },
+    {
+      "name": "start_wsl_session",
+      "description": "Abre uma sessao persistente de terminal WSL."
+    },
+    {
+      "name": "run_in_wsl_session",
+      "description": "Executa um comando dentro de uma sessao persistente."
+    },
+    {
+      "name": "close_wsl_session",
+      "description": "Fecha uma sessao persistente."
+    }
+  ],
+  "user_config": {
+    "default_cwd": {
+      "type": "string",
+      "title": "Diretorio inicial",
+      "description": "Caminho Linux/WSL usado como diretorio inicial. Exemplo: /home/denerbatista",
+      "default": "/home"
+    },
+    "allowed_roots": {
+      "type": "string",
+      "title": "Diretorios liberados",
+      "description": "Lista de caminhos Linux/WSL separados por :. Exemplo: /home/denerbatista:/mnt/c/Users/DenerBatista",
+      "default": "/home"
+    },
+    "wsl_distro": {
+      "type": "string",
+      "title": "Distribuicao WSL",
+      "description": "Opcional. Nome da distribuicao WSL se quiser forcar uma distro especifica.",
+      "default": ""
+    },
+    "timeout_ms": {
+      "type": "number",
+      "title": "Timeout padrao",
+      "description": "Timeout padrao em milissegundos para cada comando executado.",
+      "default": 120000,
+      "min": 1000,
+      "max": 600000
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "WSL_CONNECTOR_DEFAULT_CWD": "${user_config.default_cwd}",
+        "WSL_CONNECTOR_ALLOWED_ROOTS": "${user_config.allowed_roots}",
+        "WSL_CONNECTOR_DISTRO": "${user_config.wsl_distro}",
+        "WSL_CONNECTOR_TIMEOUT_MS": "${user_config.timeout_ms}"
+      }
+    }
+  }
+}

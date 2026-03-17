@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "wsl-workspace-direct": {
+      "command": "C:\\Windows\\System32\\wsl.exe",
+      "args": [
+        "-d",
+        "YOUR_WSL_DISTRO",
+        "--",
+        "node",
+        "/home/YOUR_WSL_USER/projetos/conector-wsl/server/index.js"
+      ],
+      "env": {
+        "WSL_CONNECTOR_DEFAULT_CWD": "/home/YOUR_WSL_USER",
+        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/YOUR_WSL_USER:/mnt/c/Users/YOUR_WINDOWS_USER",
+        "WSL_CONNECTOR_DISTRO": "YOUR_WSL_DISTRO",
+        "WSL_CONNECTOR_TIMEOUT_MS": "120000"
+      }
+    }
+  }
+}

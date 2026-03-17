@@ -1,0 +1,29 @@
+{
+  "name": "claude-wsl-terminal-connector",
+  "version": "0.2.0",
+  "description": "MCP connector that exposes a controlled WSL terminal and filesystem to Claude/Cowork.",
+  "type": "module",
+  "bin": {
+    "claude-wsl-terminal-connector": "./server/index.js"
+  },
+  "scripts": {
+    "start": "node ./server/index.js",
+    "package": "mcpb pack"
+  },
+  "keywords": [
+    "anthropic",
+    "claude",
+    "cowork",
+    "filesystem",
+    "mcp",
+    "wsl"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2"
+  }
+}
