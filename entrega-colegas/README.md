@@ -1,67 +1,142 @@
-# Entrega Para Colegas
+# Guia Unico Para Colegas
 
-Esta pasta contem o pacote de entrega do `WSL Workspace Connector`.
+Este guia existe para um unico objetivo: instalar e usar o `WSL Workspace Connector` com o script que ja acompanha este projeto.
+
+O que o conector e e o que ele faz estao documentados no README principal do projeto.
+
+Este arquivo cobre somente:
+
+- instalacao com o script `instalar-mcp-manual.ps1`
+- validacao no Claude/Cowork
+- publicacao na organizacao
+
+## O que o script faz automaticamente
+
+O arquivo `instalar-mcp-manual.ps1` faz a instalacao pratica para o colega.
+
+Ele:
+
+- detecta o arquivo correto `claude_desktop_config.json`
+- cria backup da configuracao atual do Claude
+- registra o servidor MCP `wsl-workspace-direct`
+- aponta o Claude para o `server/index.js` dentro do projeto no WSL
+- grava `Default CWD`, `Allowed Roots`, `Distro` e `Timeout`
+
+Ou seja: o colega nao precisa abrir JSON nem montar configuracao MCP na mao.
 
 ## Pre-requisitos
 
-- Windows com WSL funcionando.
-- Node.js 20+ instalado dentro da distro WSL.
-- Claude Desktop instalado no Windows.
+- Windows com WSL funcionando
+- Claude Desktop instalado no Windows
+- Node.js funcionando dentro da distro WSL
+- este projeto copiado ou clonado dentro do WSL
 
-## O que enviar
+Para confirmar o nome da distro:
 
-- `conector-wsl.mcpb`: bundle para instalar pela UI de Conectores do Claude. Opcional.
-- `claude_desktop_config.snippet.json`: exemplo do MCP manual que realmente entra no Cowork.
-- `instalar-mcp-manual.ps1`: script recomendado para registrar `wsl-workspace-direct`.
-- `teste-no-claude.txt`: prompt de teste para colar no Claude depois da instalacao.
+```powershell
+wsl -l -v
+```
 
-## Caminho recomendado
+Para confirmar o Node dentro do WSL:
 
-Para colegas que precisam usar o conector dentro do Cowork, o caminho recomendado e o MCP manual `wsl-workspace-direct`.
+```powershell
+wsl -d SUA_DISTRO -- node --version
+```
 
-Fluxo:
+## Como instalar com o script
 
-1. Clonar ou copiar este projeto para dentro do WSL.
-2. Confirmar `node --version` dentro do WSL.
-3. Rodar `npm install` no diretorio do projeto.
-4. No Windows, rodar `instalar-mcp-manual.ps1`.
-5. Fechar e abrir o Claude.
-6. Abrir uma tarefa nova no Cowork.
-7. Colar o conteudo de `teste-no-claude.txt`.
+1. Copie ou clone este projeto para dentro do WSL.
+2. Rode `npm install` dentro da pasta do projeto no WSL.
+3. No Windows, abra PowerShell na pasta `entrega-colegas`.
+4. Execute o script `instalar-mcp-manual.ps1`.
+5. Feche e abra o Claude Desktop.
+6. Teste o conector no Cowork.
 
-## Exemplo de instalacao
+## Exemplo pronto
 
-Se o projeto foi clonado em `/home/SEU_USUARIO/projetos/conector-wsl` e a distro e `Ubuntu-24.04`:
+Se o projeto estiver em `/home/joao/projetos/conector-wsl` e a distro for `Ubuntu-24.04`, rode:
 
 ```powershell
 .\instalar-mcp-manual.ps1 `
   -DistroName 'Ubuntu-24.04' `
-  -LinuxProjectPath '/home/SEU_USUARIO/projetos/conector-wsl' `
-  -DefaultCwd '/home/SEU_USUARIO' `
-  -AllowedRoots '/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS'
+  -LinuxProjectPath '/home/joao/projetos/conector-wsl' `
+  -DefaultCwd '/home/joao' `
+  -AllowedRoots '/home/joao:/mnt/c/Users/Joao'
 ```
 
-Troque `SEU_USUARIO` e `SEU_USUARIO_WINDOWS` pelos valores reais de cada pessoa.
+Troque:
 
-O script detecta automaticamente o arquivo correto do Claude Desktop:
+- `Ubuntu-24.04` pelo nome real da distro
+- `/home/joao/projetos/conector-wsl` pelo caminho real do projeto no WSL
+- `/home/joao` pelo diretorio inicial desejado
+- `/mnt/c/Users/Joao` pelo caminho Windows que tambem pode ser acessado
 
-- instalacao MSIX/Windows Store: `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
-- instalacao classica: `%APPDATA%\Claude\claude_desktop_config.json`
+## O que acontece depois da execucao
 
-## UI de Conectores
+Se tudo der certo, o script mostra:
 
-O bundle `conector-wsl.mcpb` pode ser instalado pela UI se voce quiser que o conector apareca em `Conectores`.
+- o arquivo de configuracao alterado
+- o caminho do backup criado
+- o nome do servidor MCP registrado
+- a distro usada
+- o projeto WSL usado
+- o `Default CWD`
+- os `Allowed Roots`
 
-Mas isso deve ser tratado como opcional. Nas validacoes deste projeto, o bundle pela UI apareceu corretamente, porem o Cowork foi mais confiavel usando o MCP manual `wsl-workspace-direct`.
+Depois disso, basta reiniciar o Claude Desktop.
 
-Se o objetivo for apenas fazer o Cowork funcionar, pode pular a instalacao pela UI.
+## Como testar no Claude
 
-## Evitar duplicidade
+Abra uma tarefa no Cowork e use um teste simples, por exemplo:
 
-Nao e necessario instalar dois conectores com a mesma funcao para o Cowork.
+```text
+Use o conector WSL e rode `pwd` no meu ambiente.
+```
 
-Recomendacao:
+Se o Claude responder com um caminho do WSL, a instalacao esta funcionando.
 
-- mantenha `wsl-workspace-direct` como conector funcional
-- use o bundle da UI apenas se quiser a aparencia em `Conectores`
-- se a UI causar confusao ou duplicidade, remova/desative o bundle e deixe so o MCP manual
+Voce tambem pode usar o arquivo `teste-no-claude.txt` desta pasta.
+
+## Arquivos desta pasta
+
+- `instalar-mcp-manual.ps1`: script principal de instalacao
+- `claude_desktop_config.snippet.json`: referencia do MCP que o script grava automaticamente
+- `teste-no-claude.txt`: prompt simples para validar no Claude
+
+## Publicacao na organizacao
+
+Se a organizacao quiser disponibilizar o conector para o time inteiro pelo Claude Desktop, use o arquivo `conector-wsl.mcpb`.
+
+Importante:
+
+- o script continua sendo o caminho de instalacao para colegas
+- a publicacao organizacional e uma etapa separada, feita por administrador
+- isso nao substitui nem quebra o que ja estiver funcionando localmente
+
+Quem faz:
+
+- `Owner` ou `Primary Owner` da organizacao no Claude Desktop
+
+Como publicar:
+
+1. Abrir o Claude Desktop com uma conta administradora.
+2. Ir em `Organization settings > Connectors > Desktop`.
+3. Ativar a `allowlist` se a organizacao quiser controlar extensoes liberadas.
+4. Clicar em `Add custom extension`.
+5. Selecionar o arquivo `conector-wsl.mcpb`.
+6. Finalizar o upload.
+7. Em `Custom team extensions`, abrir `...` e clicar em `Add to team`.
+
+## Regra de uso deste guia
+
+Para colegas:
+
+- siga este README
+- use o script
+- nao edite JSON manualmente
+
+Para administradores da organizacao:
+
+- publiquem o `.mcpb` no painel organizacional
+- usem a publicacao organizacional como distribuicao central
+- mantenham o script como caminho de suporte para instalacao local quando necessario
