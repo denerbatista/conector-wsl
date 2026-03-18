@@ -1,138 +1,154 @@
 # WSL Workspace Connector
 
-Conector MCP local para usar terminal e filesystem do WSL dentro do Claude Desktop/Cowork.
+Conector MCP local para Claude Desktop/Cowork que permite ao Claude trabalhar no seu WSL de forma controlada.
 
 ## O que ele faz
 
-- Executa comandos avulsos no WSL.
-- Mantem sessoes persistentes com `cwd` e variaveis exportadas.
-- Lista diretorios, le arquivos de texto e escreve arquivos dentro das roots permitidas.
-- Restringe terminal e filesystem ao mesmo conjunto de caminhos configurados.
+Este conector entrega ao Claude quatro capacidades praticas dentro do WSL:
 
-## Requisitos
+- executar comandos no terminal, como `pwd`, `ls`, `git status`, `npm test` e `python`
+- manter uma sessao de trabalho, para que `cd` e variaveis exportadas continuem valendo entre uma acao e outra
+- ler e escrever arquivos de texto dentro das pastas liberadas
+- limitar o acesso do Claude somente aos caminhos que voce definir na instalacao
 
-- Windows com WSL funcionando.
-- Node.js 20+.
-- Claude Desktop/Cowork com suporte a MCP.
-- `wsl_distro` configurada quando o bundle rodar no Windows e voce quiser usar as tools de filesystem.
+Em resumo: ele faz o Claude operar no seu ambiente Linux do WSL sem precisar editar JSON manualmente nem configurar MCP na mao em cada maquina.
 
-## Ferramentas expostas
+## Como ele faz
 
-- `connector_status`
-- `list_allowed_roots`
-- `list_directory`
-- `get_path_info`
-- `read_text_file`
-- `write_text_file`
-- `create_directory`
-- `run_wsl_command`
-- `start_wsl_session`
-- `run_in_wsl_session`
-- `close_wsl_session`
+O fluxo e simples:
 
-## Instalar dependencias
+1. O Claude Desktop instala o arquivo `conector-wsl.mcpb` como extensao local.
+2. Durante a instalacao, o proprio Claude mostra um formulario com os dados que esse conector precisa.
+3. Quando o Claude precisa agir, ele sobe o servidor MCP local do projeto.
+4. Esse servidor chama o `wsl.exe`, entra na distribuicao WSL configurada e executa as operacoes solicitadas.
+5. O resultado volta para o Claude ja dentro da conversa ou da tarefa no Cowork.
 
-Rode no WSL:
+Isso deixa a instalacao padronizada e automatizada para todos os colegas: o mesmo bundle, a mesma tela de configuracao e o mesmo comportamento.
 
-```bash
-cd /home/SEU_USUARIO/projetos/conector-wsl
-npm install
+## Forma unica de instalacao para colegas
+
+Este projeto adota um unico caminho de instalacao:
+
+- distribuir o arquivo `conector-wsl.mcpb`
+- instalar esse arquivo no Claude Desktop pela interface de extensoes
+
+Nao use `claude_desktop_config.json`, nao use MCP manual e nao use configuracao por URL remota para este projeto.
+
+## Pre-requisitos na maquina do colega
+
+- Windows com WSL funcionando
+- Claude Desktop instalado e atualizado
+- nome da distribuicao WSL conhecido
+
+Para descobrir o nome da distribuicao WSL, rode no PowerShell:
+
+```powershell
+wsl -l -v
 ```
 
-## Rodar localmente
+## Passo a passo de instalacao
 
-```bash
-cd /home/SEU_USUARIO/projetos/conector-wsl
-node ./server/index.js
+1. Entregue ao colega o arquivo `conector-wsl.mcpb`.
+2. Peca para ele abrir o Claude Desktop.
+3. No Claude Desktop, acesse `Settings > Extensions > Advanced settings > Extension Developer > Install Extension...`
+4. Selecione o arquivo `conector-wsl.mcpb`.
+5. Preencha os campos pedidos pelo instalador.
+6. Conclua a instalacao.
+7. Reinicie o Claude Desktop se o app pedir ou se as tools ainda nao aparecerem.
+
+Os colegas nao precisam:
+
+- clonar este repositorio
+- rodar `npm install`
+- editar arquivo JSON de configuracao
+- cadastrar URL de servidor MCP remoto
+
+## Como preencher os campos da instalacao
+
+Use estes valores como referencia:
+
+- `Diretorio inicial`
+  Exemplo: `/home/joao`
+  Esse e o ponto de partida das acoes do Claude no WSL.
+
+- `Diretorios liberados`
+  Exemplo: `/home/joao:/mnt/c/Users/Joao`
+  Esses sao os caminhos que o Claude podera usar.
+
+- `Distribuicao WSL`
+  Exemplo: `Ubuntu-24.04`
+  Esse e o nome exato retornado por `wsl -l -v`.
+
+## Teste rapido depois de instalar
+
+Depois da instalacao, abra uma conversa ou tarefa no Cowork e teste com algo simples, por exemplo:
+
+```text
+Use o conector WSL e rode `pwd` no meu ambiente.
 ```
 
-## Gerar o bundle para compartilhar
+Se a resposta vier com o caminho do WSL, o conector esta ativo.
+
+## Artefato de instalacao
+
+O arquivo usado para instalar nas maquinas dos colegas e:
+
+```text
+conector-wsl.mcpb
+```
+
+## Publicacao na organizacao
+
+Esta publicacao organizacional usa o mesmo arquivo `conector-wsl.mcpb` que ja funciona na instalacao individual. Nao e necessario mudar o conector atual nem reconfigurar o que ja esta funcionando no seu Claude.
+
+Importante:
+
+- este projeto deve ser publicado como `Desktop Extension (.mcpb)`
+- nao deve ser publicado pelo fluxo de `Plugins ZIP` do marketplace do Cowork
+
+Quem faz essa etapa:
+
+- `Owner` ou `Primary Owner` da organizacao no Claude Desktop
+
+Passo a passo:
+
+1. Abrir o Claude Desktop com uma conta administradora da organizacao.
+2. Ir em `Organization settings > Connectors > Desktop`.
+3. Se a organizacao usar controle centralizado, ativar a `allowlist` de extensoes.
+4. Clicar em `Add custom extension`.
+5. Selecionar o arquivo `conector-wsl.mcpb`.
+6. Concluir o upload da extensao.
+7. Em `Custom team extensions`, abrir o menu `...` da extensao e clicar em `Add to team`.
+
+Resultado esperado:
+
+- a extensao passa a ficar disponivel para o time pela organizacao
+- isso nao altera a sua instalacao individual ja existente
+
+Atualizacao futura:
+
+1. Gerar uma nova versao do bundle com `npm run package`.
+2. Manter o mesmo identificador do conector.
+3. Subir a nova versao no mesmo painel organizacional usando `Upload new version`.
+
+Referencia oficial:
+
+- `Gerenciar plugins do Cowork para sua organizacao` serve para plugins ZIP e sincronizacao GitHub, nao para este projeto.
+- para este conector, use o fluxo de `Desktop Extensions` e `allowlist` organizacional no Claude Desktop.
+
+## Como atualizar para uma nova versao
+
+Quando este projeto evoluir, o responsavel pelo repositorio gera um novo bundle e redistribui o arquivo atualizado:
 
 ```bash
-cd /home/SEU_USUARIO/projetos/conector-wsl
 npm run package
 ```
 
-Isso gera o arquivo `conector-wsl.mcpb`, que pode ser aberto no Claude Desktop para instalar o conector pela UI.
+Depois disso, os colegas so precisam instalar a versao nova do `.mcpb`.
 
-## Instalar pela UI do Claude
+## Limites conhecidos
 
-Abra o arquivo `conector-wsl.mcpb` no Claude Desktop e preencha:
-
-- `Diretorio inicial`: caminho Linux/WSL inicial. Exemplo: `/home/SEU_USUARIO`
-- `Diretorios liberados`: caminhos Linux/WSL permitidos, separados por `:`. Exemplo: `/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS`
-- `Distribuicao WSL`: nome da distro. Exemplo: `Ubuntu-24.04`
-
-Depois disso, o conector aparece em `Conectores` como `WSL Workspace Connector`.
-
-## Instalar manualmente para o Cowork
-
-Este e o caminho recomendado para quem precisa usar o conector dentro do Cowork.
-
-Em algumas builds do Claude, conectores locais instalados pela UI aparecem em `Conectores`, mas nao entram nas sessoes do Cowork. Para garantir que o Cowork enxergue o conector, adicione um MCP manual em `claude_desktop_config.json`.
-
-Exemplo:
-
-```json
-{
-  "mcpServers": {
-    "wsl-workspace-direct": {
-      "command": "C:\\Windows\\System32\\wsl.exe",
-      "args": [
-        "-d",
-        "SUA_DISTRO_WSL",
-        "--",
-        "node",
-        "/home/SEU_USUARIO/projetos/conector-wsl/server/index.js"
-      ],
-      "env": {
-        "WSL_CONNECTOR_DEFAULT_CWD": "/home/SEU_USUARIO",
-        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS",
-        "WSL_CONNECTOR_DISTRO": "SUA_DISTRO_WSL",
-        "WSL_CONNECTOR_TIMEOUT_MS": "120000"
-      }
-    }
-  }
-}
-```
-
-Troque `SEU_USUARIO`, `SEU_USUARIO_WINDOWS` e `SUA_DISTRO_WSL` pelos valores reais de cada pessoa.
-
-Esse modo manual nao depende da UI de conectores e foi o caminho mais confiavel para o Cowork nas validacoes feitas neste projeto.
-
-## Ordem recomendada de instalacao
-
-Se o objetivo principal for Cowork:
-
-1. Clone o repositorio dentro do WSL.
-2. Rode `npm install`.
-3. Registre o MCP manual `wsl-workspace-direct`.
-4. Feche e abra o Claude.
-5. Teste no Cowork.
-
-Instalar o bundle pela UI fica como opcional, apenas para quem tambem quiser ver o conector em `Conectores`.
-
-## Como replicar para colegas
-
-1. Clone o repositorio dentro do WSL.
-2. Rode `npm install`.
-3. Rode `npm run package`.
-4. Entregue o script de instalacao manual e o snippet de `claude_desktop_config.json`.
-5. Deixe o `conector-wsl.mcpb` como opcional para quem quiser instalar pela UI.
-6. Ajuste distro, usuario e roots de cada pessoa.
-
-## Variaveis de ambiente
-
-- `WSL_CONNECTOR_DEFAULT_CWD`: diretorio inicial.
-- `WSL_CONNECTOR_ALLOWED_ROOTS`: lista de roots permitidas, separada por `:`.
-- `WSL_CONNECTOR_DISTRO`: nome da distribuicao WSL.
-- `WSL_CONNECTOR_TIMEOUT_MS`: timeout padrao por comando.
-- `WSL_CONNECTOR_MAX_OUTPUT_CHARS`: limite da saida dos comandos.
-- `WSL_CONNECTOR_MAX_FILE_CHARS`: limite da leitura de arquivos.
-
-## Limites
-
-- O conector nao cria TTY interativo real.
-- Sessoes persistem apenas `cwd` e variaveis exportadas.
-- Alias, funcoes shell e variaveis nao exportadas nao sao preservadas.
-- As tools de filesystem trabalham apenas com texto UTF-8.
+- Ele nao cria um TTY interativo real.
+- A sessao preserva `cwd` e variaveis exportadas, mas nao preserva bem aliases, funcoes shell e variaveis nao exportadas.
+- As operacoes de arquivo trabalham com texto UTF-8.
+- O Claude continua limitado aos caminhos liberados na instalacao.
