@@ -4,15 +4,16 @@
       "command": "C:\\Windows\\System32\\wsl.exe",
       "args": [
         "-d",
-        "YOUR_WSL_DISTRO",
+        "SUA_DISTRO",
         "--",
-        "node",
-        "/home/YOUR_WSL_USER/projetos/conector-wsl/server/index.js"
+        "bash",
+        "-lc",
+        "node '/caminho/wsl/conector-wsl/server/index.js'"
       ],
       "env": {
-        "WSL_CONNECTOR_DEFAULT_CWD": "/home/YOUR_WSL_USER",
-        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/YOUR_WSL_USER:/mnt/c/Users/YOUR_WINDOWS_USER",
-        "WSL_CONNECTOR_DISTRO": "YOUR_WSL_DISTRO",
+        "WSL_CONNECTOR_DEFAULT_CWD": "/home/SEU_USUARIO",
+        "WSL_CONNECTOR_ALLOWED_ROOTS": "/home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS",
+        "WSL_CONNECTOR_DISTRO": "SUA_DISTRO",
         "WSL_CONNECTOR_TIMEOUT_MS": "120000"
       }
     }

@@ -1,10 +1,6 @@
 param(
-  [Parameter(Mandatory = $true)]
-  [string]$DistroName,
-
-  [Parameter(Mandatory = $true)]
-  [string]$LinuxProjectPath,
-
+  [Parameter(Mandatory = $true)][string]$DistroName,
+  [Parameter(Mandatory = $true)][string]$LinuxProjectPath,
   [string]$DefaultCwd,
   [string]$AllowedRoots,
   [string]$ServerName = "wsl-workspace-direct",
@@ -14,130 +10,88 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Get-ClaudeConfigPath {
-  $candidates = @(
-    (Join-Path $env:LOCALAPPDATA "Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json"),
-    (Join-Path $env:APPDATA "Claude\claude_desktop_config.json")
-  )
-
-  foreach ($candidate in $candidates) {
-    if (Test-Path $candidate) {
-      return $candidate
-    }
-  }
-
-  $directory = Split-Path $candidates[0] -Parent
-  New-Item -ItemType Directory -Force -Path $directory | Out-Null
-  return $candidates[0]
+function Get-ConfigPath {
+  $a = Join-Path $env:LOCALAPPDATA "Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json"
+  $b = Join-Path $env:APPDATA "Claude\claude_desktop_config.json"
+  if (Test-Path $a) { return $a }
+  if (Test-Path $b) { return $b }
+  New-Item -ItemType Directory -Force -Path (Split-Path $a -Parent) | Out-Null
+  return $a
 }
 
-function Get-WslHomeFromPath {
-  param([string]$PathValue)
-
-  if ($PathValue -match '^(/home/[^/]+)') {
-    return $Matches[1]
-  }
-
-  return $null
+function Wsl-Bash([string]$d, [string]$cmd) {
+  $out = & wsl.exe -d $d -- bash -lc $cmd 2>&1
+  return [pscustomobject]@{ Code = $LASTEXITCODE; Out = ($out -join "`n").Trim() }
 }
 
-function Escape-BashSingleQuoted {
-  param([string]$Value)
-
-  return $Value.Replace("'", "'\"'\"'")
-}
-
-function Ensure-Property {
-  param(
-    [object]$Object,
-    [string]$Name,
-    [object]$Value
-  )
-
-  if ($null -eq $Object.PSObject.Properties[$Name]) {
-    $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
-  }
-}
-
-$wslHome = Get-WslHomeFromPath -PathValue $LinuxProjectPath
-
-if (-not $DefaultCwd) {
-  if ($wslHome) {
-    $DefaultCwd = $wslHome
-  } else {
-    $DefaultCwd = $LinuxProjectPath
-  }
-}
-
-if (-not $AllowedRoots) {
-  if ($wslHome) {
-    $AllowedRoots = "$wslHome:/mnt/c/Users/$env:USERNAME"
-  } else {
-    $AllowedRoots = $DefaultCwd
-  }
-}
+# Defaults inteligentes
+if (-not $DefaultCwd -and $LinuxProjectPath -match '^(/home/[^/]+)') { $DefaultCwd = $Matches[1] }
+if (-not $DefaultCwd) { $DefaultCwd = $LinuxProjectPath }
+if (-not $AllowedRoots) { $AllowedRoots = "$DefaultCwd:/mnt/c/Users/$env:USERNAME" }
 
 $serverPath = "$LinuxProjectPath/server/index.js"
-$escapedServerPath = Escape-BashSingleQuoted -Value $serverPath
 
-& wsl.exe -d $DistroName -- bash -lc "test -f '$escapedServerPath'"
-if ($LASTEXITCODE -ne 0) {
-  throw "Nao encontrei $serverPath dentro da distro $DistroName."
-}
+# 1. Garante server/index.js
+$check = Wsl-Bash $DistroName "test -f '$serverPath' && echo OK"
+if ($check.Out -ne "OK") { throw "Nao encontrei $serverPath em '$DistroName'. Clone/copie o projeto pro WSL." }
 
-$configPath = Get-ClaudeConfigPath
+# 2. Garante Node >= 20 (roda setup-wsl.sh se faltar)
+$node = Wsl-Bash $DistroName "node -v 2>/dev/null || echo NONE"
+$major = if ($node.Out -match '^v?(\d+)') { [int]$Matches[1] } else { 0 }
 
-if (Test-Path $configPath) {
-  $rawConfig = Get-Content -Raw $configPath
-  if ([string]::IsNullOrWhiteSpace($rawConfig)) {
-    $config = [pscustomobject]@{}
-  } else {
-    $config = $rawConfig | ConvertFrom-Json
-  }
+if ($major -lt 20) {
+  Write-Host "[setup] Node ausente/desatualizado. Rodando setup-wsl.sh..."
+  & wsl.exe -d $DistroName -- bash -lc "bash '$LinuxProjectPath/entrega-colegas/setup-wsl.sh'"
+  if ($LASTEXITCODE -ne 0) { throw "setup-wsl.sh falhou. Rode manualmente dentro do WSL." }
+  $node = Wsl-Bash $DistroName "node -v"
+  Write-Host "[ok] Node agora: $($node.Out)"
 } else {
-  $config = [pscustomobject]@{}
+  Write-Host "[ok] Node $($node.Out) detectado."
 }
 
-Ensure-Property -Object $config -Name "mcpServers" -Value ([pscustomobject]@{})
+# 3. Garante node_modules
+$dep = Wsl-Bash $DistroName "test -d '$LinuxProjectPath/node_modules' && echo OK || echo MISSING"
+if ($dep.Out -eq "MISSING") {
+  Write-Host "[setup] Instalando dependencias..."
+  & wsl.exe -d $DistroName -- bash -lc "cd '$LinuxProjectPath' && npm install --no-audit --no-fund"
+  if ($LASTEXITCODE -ne 0) { throw "npm install falhou." }
+}
+
+# 4. Atualiza claude_desktop_config.json
+$configPath = Get-ConfigPath
+$config = if (Test-Path $configPath) {
+  $raw = Get-Content -Raw $configPath
+  if ([string]::IsNullOrWhiteSpace($raw)) { [pscustomobject]@{} } else { $raw | ConvertFrom-Json }
+} else { [pscustomobject]@{} }
+
+if ($null -eq $config.PSObject.Properties["mcpServers"]) {
+  $config | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([pscustomobject]@{})
+}
 
 $serverConfig = [pscustomobject]@{
   command = "C:\Windows\System32\wsl.exe"
-  args = @(
-    "-d",
-    $DistroName,
-    "--",
-    "node",
-    $serverPath
-  )
-  env = [pscustomobject]@{
-    WSL_CONNECTOR_DEFAULT_CWD = $DefaultCwd
+  args    = @("-d", $DistroName, "--", "bash", "-lc", "node '$serverPath'")
+  env     = [pscustomobject]@{
+    WSL_CONNECTOR_DEFAULT_CWD   = $DefaultCwd
     WSL_CONNECTOR_ALLOWED_ROOTS = $AllowedRoots
-    WSL_CONNECTOR_DISTRO = $DistroName
-    WSL_CONNECTOR_TIMEOUT_MS = $TimeoutMs.ToString()
+    WSL_CONNECTOR_DISTRO        = $DistroName
+    WSL_CONNECTOR_TIMEOUT_MS    = $TimeoutMs.ToString()
   }
 }
 
 $config.mcpServers | Add-Member -NotePropertyName $ServerName -NotePropertyValue $serverConfig -Force
 
-$backupPath = "$configPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss').json"
 if (Test-Path $configPath) {
-  Copy-Item $configPath $backupPath -Force
+  Copy-Item $configPath "$configPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss').json" -Force
 }
 
-$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText(
   $configPath,
   ($config | ConvertTo-Json -Depth 20),
-  $utf8NoBom
+  (New-Object System.Text.UTF8Encoding($false))
 )
 
-Write-Host "Config atualizado com sucesso."
-Write-Host "Arquivo:" $configPath
-Write-Host "Backup:" $backupPath
-Write-Host "Servidor MCP:" $ServerName
-Write-Host "Distro:" $DistroName
-Write-Host "Projeto WSL:" $LinuxProjectPath
-Write-Host "Default CWD:" $DefaultCwd
-Write-Host "Allowed Roots:" $AllowedRoots
 Write-Host ""
-Write-Host "Feche e abra o Claude para carregar o conector."
+Write-Host "OK. Conector registrado em $configPath" -ForegroundColor Green
+Write-Host "Distro: $DistroName | Projeto: $LinuxProjectPath"
+Write-Host "Reinicie o Claude Desktop."
