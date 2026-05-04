@@ -1,9 +1,1 @@
-Use apenas o conector `wsl-workspace-direct`.
-
-1. Chame `connector_status`
-2. Chame `list_directory` em `/home/SEU_USUARIO/projetos/conector-wsl`
-3. Chame `read_text_file` em `/home/SEU_USUARIO/projetos/conector-wsl/manifest.json`
-4. Chame `run_wsl_command` com `pwd && whoami && echo ok`
-
-Antes da resposta final, diga explicitamente quais tools voce chamou.
-Se algum passo falhar, mostre a mensagem exata de erro.
+Use o conector WSL e rode `node -v` no meu ambiente.
