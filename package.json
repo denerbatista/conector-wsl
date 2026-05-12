@@ -8,7 +8,7 @@
   },
   "main": "src/index.js",
   "bin": {
-    "claude-wsl-terminal-connector": "./src/index.js"
+    "claude-wsl-terminal-connector": "src/index.js"
   },
   "files": [
     "src",
