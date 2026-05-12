@@ -2,11 +2,23 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.3.2] - 2026-05-12
+
+### Adicionado
+
+- **Auto-configuracao do Claude Desktop** via `scripts/postinstall.js`. Ao rodar `npm install -g claude-wsl-terminal-connector`, o conector detecta o SO e ja se adiciona ao `claude_desktop_config.json` — basta reiniciar o Claude Desktop.
+  - WSL: detecta usuario Windows via `$USERPROFILE` e escreve no caminho correto do Windows (`/mnt/c/Users/<usuario>/AppData/Roaming/Claude/`)
+  - Windows nativo: escreve em `%APPDATA%\Claude\`
+  - macOS: escreve em `~/Library/Application Support/Claude/`
+  - Linux nativo: escreve em `~/.config/Claude/`
+- Idempotente: nao sobrescreve configuracao existente para o conector.
+- Falha silenciosa com instrucao manual em caso de erro.
+
 ## [0.3.1] - 2026-05-12
 
 ### Adicionado
 
-- **Publicado no npm** como [`claude-wsl-terminal-connector`](https://www.npmjs.com/package/claude-wsl-terminal-connector). Agora e possivel instalar via `npx claude-wsl-terminal-connector` sem precisar baixar o `.mcpb` manualmente.
+- **Publicado no npm** como [`claude-wsl-terminal-connector`](https://www.npmjs.com/package/claude-wsl-terminal-connector). Instalacao via `npx claude-wsl-terminal-connector` sem precisar baixar o `.mcpb` manualmente.
 - Badge npm no README linkando para o pacote.
 - Secao de instalacao alternativa via `npx` / `npm install -g` para qualquer cliente MCP compativel.
 - Tool annotations (`readOnlyHint` / `destructiveHint`) em todas as 11 tools — requisito do Connectors Directory da Anthropic.

@@ -10,47 +10,32 @@ Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso contro
 
 ## Por que esse conector
 
-- **Zero-config.** Instala o `.mcpb` e ja funciona — distro, usuario Linux e usuario Windows sao detectados automaticamente.
+- **Zero-config.** Instala e ja funciona — distro, usuario Linux e usuario Windows sao detectados automaticamente.
 - **Sandbox por path.** Toda operacao de arquivo e terminal e validada contra uma lista de `allowed_roots` (`/home/<voce>` e `/mnt/c/Users/<voce>` por padrao).
 - **Sessao com cwd preservado.** `cd` e variaveis exportadas continuam valendo entre comandos da mesma sessao.
-- **Cross-host file access.** Acessa arquivos do WSL (via `\\wsl.localhost\`) e do Windows (via `C:\...` mapeado de `/mnt/c/...`) sem o erro UNC-loop.
+- **Cross-host file access.** Acessa arquivos do WSL e do Windows sem o erro UNC-loop.
 
 ## Instalacao
 
-### Opcao 1 — Claude Desktop / Cowork (recomendado)
-
-1. Baixe `conector-wsl.mcpb` do [release mais recente](https://github.com/denerbatista/conector-wsl/releases/latest).
-2. Arraste o arquivo para o Claude Desktop, ou abra **Settings → Extensions → Install from file**.
-3. Reinicie o Claude Desktop (System Tray → Quit, abrir de novo).
-
-Pronto. Nao precisa preencher nada — todos os campos sao opcionais e auto-detectaveis.
-
-### Opcao 2 — Via npx (qualquer cliente MCP)
-
-Para clientes MCP que usam configuracao manual (ex: outros clientes compatíveis com MCP), adicione ao seu `mcp_config`:
-
-```json
-{
-  "mcpServers": {
-    "wsl-connector": {
-      "command": "npx",
-      "args": ["claude-wsl-terminal-connector"]
-    }
-  }
-}
-```
-
-Ou instale globalmente:
+### Opcao 1 — Via npm (mais facil)
 
 ```bash
 npm install -g claude-wsl-terminal-connector
 ```
 
-O pacote esta disponivel em [npmjs.com/package/claude-wsl-terminal-connector](https://www.npmjs.com/package/claude-wsl-terminal-connector).
+O instalador detecta seu SO e ja adiciona o conector ao `claude_desktop_config.json` automaticamente. Basta **reiniciar o Claude Desktop**.
+
+Funciona em WSL, Windows nativo, macOS e Linux.
+
+### Opcao 2 — Claude Desktop / Cowork via .mcpb
+
+1. Baixe `conector-wsl.mcpb` do [release mais recente](https://github.com/denerbatista/conector-wsl/releases/latest).
+2. Arraste para o Claude Desktop, ou abra **Settings → Extensions → Install from file**.
+3. Reinicie o Claude Desktop.
 
 ### Configuracao opcional
 
-Ambas as opcoes aceitam as mesmas variaveis de ambiente para sobrescrever os valores auto-detectados:
+Todos os campos sao opcionais — o conector detecta tudo automaticamente. Se quiser sobrescrever:
 
 | Campo           | Padrao auto-detectado                        | Quando preencher                    |
 | --------------- | -------------------------------------------- | ----------------------------------- |
@@ -87,7 +72,7 @@ Claude Desktop  --stdio-->  node src/index.js
                                  +-- sessions    (markers pra capturar cwd + state)
 ```
 
-O modulo `filesystem.toHostPath` faz a coisa esperta: paths `/mnt/<letra>/...` viram `<Letra>:\...` (path Windows nativo, sem UNC). Paths `/home/...`, `/etc/...` etc viram `\\wsl.localhost\<distro>\...`. Isso resolve o `EPERM` classico em `/mnt/c/`.
+O modulo `filesystem.toHostPath` converte paths `/mnt/<letra>/...` para `<Letra>:\...` (path Windows nativo, sem UNC), resolvendo o `EPERM` classico em `/mnt/c/`.
 
 ## Desenvolvimento
 
