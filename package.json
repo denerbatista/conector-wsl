@@ -1,6 +1,6 @@
 {
   "name": "claude-wsl-terminal-connector",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP connector that exposes a controlled WSL terminal and filesystem to Claude/Cowork, with zero-config auto-detection.",
   "type": "module",
   "engines": {
