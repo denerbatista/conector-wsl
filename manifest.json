@@ -28,64 +28,47 @@
   "tools": [
     {
       "name": "connector_status",
-      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao).",
-      "readOnlyHint": true
+      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao)."
     },
     {
       "name": "list_allowed_roots",
-      "description": "Lista os caminhos liberados para terminal e filesystem.",
-      "readOnlyHint": true
+      "description": "Lista os caminhos liberados para terminal e filesystem."
     },
     {
       "name": "list_directory",
-      "description": "Lista o conteudo de um diretorio permitido.",
-      "readOnlyHint": true
+      "description": "Lista o conteudo de um diretorio permitido."
     },
     {
       "name": "get_path_info",
-      "description": "Mostra tipo, tamanho e datas de um caminho permitido.",
-      "readOnlyHint": true
+      "description": "Mostra tipo, tamanho e datas de um caminho permitido."
     },
     {
       "name": "read_text_file",
-      "description": "Le o conteudo de um arquivo de texto no WSL.",
-      "readOnlyHint": true
+      "description": "Le o conteudo de um arquivo de texto no WSL."
     },
     {
       "name": "write_text_file",
-      "description": "Escreve um arquivo de texto no WSL.",
-      "readOnlyHint": false,
-      "destructiveHint": true
+      "description": "Escreve um arquivo de texto no WSL."
     },
     {
       "name": "create_directory",
-      "description": "Cria um diretorio dentro das roots permitidas.",
-      "readOnlyHint": false,
-      "destructiveHint": false
+      "description": "Cria um diretorio dentro das roots permitidas."
     },
     {
       "name": "run_wsl_command",
-      "description": "Executa um comando avulso no WSL.",
-      "readOnlyHint": false,
-      "destructiveHint": true
+      "description": "Executa um comando avulso no WSL."
     },
     {
       "name": "start_wsl_session",
-      "description": "Abre uma sessao persistente de terminal WSL.",
-      "readOnlyHint": false,
-      "destructiveHint": false
+      "description": "Abre uma sessao persistente de terminal WSL."
     },
     {
       "name": "run_in_wsl_session",
-      "description": "Executa um comando dentro de uma sessao persistente.",
-      "readOnlyHint": false,
-      "destructiveHint": true
+      "description": "Executa um comando dentro de uma sessao persistente."
     },
     {
       "name": "close_wsl_session",
-      "description": "Fecha uma sessao persistente.",
-      "readOnlyHint": false,
-      "destructiveHint": false
+      "description": "Fecha uma sessao persistente."
     }
   ],
   "user_config": {
