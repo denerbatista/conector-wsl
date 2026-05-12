@@ -1,6 +1,7 @@
 # WSL Workspace Connector
 
 [![CI](https://github.com/denerbatista/conector-wsl/actions/workflows/ci.yml/badge.svg)](https://github.com/denerbatista/conector-wsl/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/claude-wsl-terminal-connector.svg)](https://www.npmjs.com/package/claude-wsl-terminal-connector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-43853d.svg)](package.json)
 [![MCPB](https://img.shields.io/badge/MCPB-0.3-0099ff.svg)](manifest.json)
@@ -14,15 +15,42 @@ Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso contro
 - **Sessao com cwd preservado.** `cd` e variaveis exportadas continuam valendo entre comandos da mesma sessao.
 - **Cross-host file access.** Acessa arquivos do WSL (via `\\wsl.localhost\`) e do Windows (via `C:\...` mapeado de `/mnt/c/...`) sem o erro UNC-loop.
 
-## Instalacao (Claude Desktop)
+## Instalacao
 
-1. Baixe `conector-wsl.mcpb` do release mais recente.
-2. Arraste o arquivo para o Claude Desktop, ou abra **Settings -> Extensions -> Install from file**.
-3. Reinicie o Claude Desktop (System Tray -> Quit, abrir de novo).
+### Opcao 1 — Claude Desktop / Cowork (recomendado)
 
-Pronto. Nao precisa preencher nada na tela de configuracao — todos os campos sao opcionais e auto-detectaveis.
+1. Baixe `conector-wsl.mcpb` do [release mais recente](https://github.com/denerbatista/conector-wsl/releases/latest).
+2. Arraste o arquivo para o Claude Desktop, ou abra **Settings → Extensions → Install from file**.
+3. Reinicie o Claude Desktop (System Tray → Quit, abrir de novo).
 
-Se quiser sobrescrever:
+Pronto. Nao precisa preencher nada — todos os campos sao opcionais e auto-detectaveis.
+
+### Opcao 2 — Via npx (qualquer cliente MCP)
+
+Para clientes MCP que usam configuracao manual (ex: outros clientes compatíveis com MCP), adicione ao seu `mcp_config`:
+
+```json
+{
+  "mcpServers": {
+    "wsl-connector": {
+      "command": "npx",
+      "args": ["claude-wsl-terminal-connector"]
+    }
+  }
+}
+```
+
+Ou instale globalmente:
+
+```bash
+npm install -g claude-wsl-terminal-connector
+```
+
+O pacote esta disponivel em [npmjs.com/package/claude-wsl-terminal-connector](https://www.npmjs.com/package/claude-wsl-terminal-connector).
+
+### Configuracao opcional
+
+Ambas as opcoes aceitam as mesmas variaveis de ambiente para sobrescrever os valores auto-detectados:
 
 | Campo           | Padrao auto-detectado                        | Quando preencher                    |
 | --------------- | -------------------------------------------- | ----------------------------------- |
