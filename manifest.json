@@ -1,27 +1,23 @@
 {
-  "manifest_version": "0.2",
+  "manifest_version": "0.3",
   "name": "claude-wsl-terminal-connector",
   "display_name": "WSL Workspace Connector",
-  "version": "0.2.0",
-  "description": "Expose terminal e filesystem do WSL para o Claude Desktop/Cowork via MCP.",
+  "version": "0.3.0",
+  "description": "Expoe terminal e filesystem do WSL para o Claude Desktop/Cowork via MCP, com auto-deteccao zero-config.",
+  "long_description": "Conector MCP local que da ao Claude acesso controlado ao seu WSL: executar comandos, manter sessao de terminal com cwd e variaveis preservadas, e ler/escrever arquivos dentro das pastas liberadas. Por padrao detecta automaticamente a distro WSL, o usuario Linux e o usuario Windows, e libera /home/<linux-user> e /mnt/c/Users/<windows-user>. Tudo pode ser sobrescrito na tela de configuracao.",
   "author": {
     "name": "Dener Batista"
   },
-  "keywords": [
-    "claude",
-    "cowork",
-    "filesystem",
-    "mcp",
-    "terminal",
-    "wsl"
-  ],
-  "homepage": "https://claude.ai",
+  "keywords": ["claude", "cowork", "filesystem", "mcp", "terminal", "wsl"],
+  "homepage": "https://github.com/denerbatista/conector-wsl",
+  "documentation": "https://github.com/denerbatista/conector-wsl#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/denerbatista/conector-wsl"
+  },
   "license": "MIT",
   "compatibility": {
-    "platforms": [
-      "win32",
-      "linux"
-    ],
+    "platforms": ["win32", "linux"],
     "runtimes": {
       "node": ">=20.0.0"
     }
@@ -29,7 +25,7 @@
   "tools": [
     {
       "name": "connector_status",
-      "description": "Mostra o status da configuracao ativa do conector."
+      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao)."
     },
     {
       "name": "list_allowed_roots",
@@ -75,39 +71,41 @@
   "user_config": {
     "default_cwd": {
       "type": "string",
-      "title": "Diretorio inicial",
-      "description": "Caminho Linux/WSL usado como diretorio inicial. Exemplo: /home/SEU_USUARIO",
-      "default": "/home"
+      "title": "Diretorio inicial (opcional)",
+      "description": "Deixe vazio para auto-detectar /home/<seu-usuario-linux>. Exemplo manual: /home/joao",
+      "required": false,
+      "default": ""
     },
     "allowed_roots": {
       "type": "string",
-      "title": "Diretorios liberados",
-      "description": "Lista de caminhos Linux/WSL separados por :. Exemplo: /home/SEU_USUARIO:/mnt/c/Users/SEU_USUARIO_WINDOWS",
-      "default": "/home"
+      "title": "Diretorios liberados (opcional)",
+      "description": "Caminhos Linux/WSL separados por : . Deixe vazio para auto-detectar /home/<linux-user>:/mnt/c/Users/<windows-user>. Exemplo manual: /home/joao:/mnt/c/Users/Joao",
+      "required": false,
+      "default": ""
     },
     "wsl_distro": {
       "type": "string",
-      "title": "Distribuicao WSL",
-      "description": "Opcional. Nome da distribuicao WSL se quiser forcar uma distro especifica.",
+      "title": "Distribuicao WSL (opcional)",
+      "description": "Deixe vazio para usar a distro default (* em `wsl --list --verbose`). Exemplo manual: Ubuntu-24.04",
+      "required": false,
       "default": ""
     },
     "timeout_ms": {
       "type": "number",
-      "title": "Timeout padrao",
+      "title": "Timeout padrao (ms)",
       "description": "Timeout padrao em milissegundos para cada comando executado.",
       "default": 120000,
       "min": 1000,
-      "max": 600000
+      "max": 600000,
+      "required": false
     }
   },
   "server": {
     "type": "node",
-    "entry_point": "server/index.js",
+    "entry_point": "src/index.js",
     "mcp_config": {
       "command": "node",
-      "args": [
-        "${__dirname}/server/index.js"
-      ],
+      "args": ["${__dirname}/src/index.js"],
       "env": {
         "WSL_CONNECTOR_DEFAULT_CWD": "${user_config.default_cwd}",
         "WSL_CONNECTOR_ALLOWED_ROOTS": "${user_config.allowed_roots}",
