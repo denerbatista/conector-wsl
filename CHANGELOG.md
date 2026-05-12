@@ -2,6 +2,23 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.3.1] - 2026-05-12
+
+### Adicionado
+
+- **Publicado no npm** como [`claude-wsl-terminal-connector`](https://www.npmjs.com/package/claude-wsl-terminal-connector). Agora e possivel instalar via `npx claude-wsl-terminal-connector` sem precisar baixar o `.mcpb` manualmente.
+- Badge npm no README linkando para o pacote.
+- Secao de instalacao alternativa via `npx` / `npm install -g` para qualquer cliente MCP compativel.
+- Tool annotations (`readOnlyHint` / `destructiveHint`) em todas as 11 tools — requisito do Connectors Directory da Anthropic.
+- Secao Privacy Policy no README e campo `privacy_policies` no `manifest.json`.
+- Coluna Hint na tabela de ferramentas expostas no README.
+- Submissao ao Connectors Directory oficial da Anthropic (em revisao).
+
+### Corrigido
+
+- `parseWslListVerbose` extraido como funcao testavel em `detect.js` (fix de deteccao em alguns ambientes Windows).
+- Deteccao de `isMainModule` normaliza separadores de path (`/` vs `\`) para funcionar tanto em Windows nativo quanto WSL.
+
 ## [0.3.0] - 2026-05-12
 
 ### Adicionado
