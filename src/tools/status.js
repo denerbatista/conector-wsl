@@ -7,6 +7,7 @@ export function registerStatusTools(server, ctx) {
     "connector_status",
     "Mostra como o conector foi inicializado, com terminal e filesystem do WSL.",
     {},
+    { readOnlyHint: true },
     async () =>
       textResult(
         JSON.stringify(
@@ -33,6 +34,7 @@ export function registerStatusTools(server, ctx) {
     "list_allowed_roots",
     "Lista os diretorios do WSL liberados para terminal e filesystem.",
     {},
+    { readOnlyHint: true },
     async () =>
       textResult(
         JSON.stringify({ allowedRoots: ctx.config.allowedRoots }, null, 2),

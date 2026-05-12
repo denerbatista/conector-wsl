@@ -36,6 +36,7 @@ export function registerFilesystemTools(server, ctx) {
     "list_directory",
     "Lista arquivos e pastas dentro de um diretorio permitido do WSL.",
     { path: z.string().min(1).optional() },
+    { readOnlyHint: true },
     async ({ path: requested }) => {
       const resolved = resolveFsPath(requested || ctx.config.defaultCwd, ctx);
       const hostPath = toHostPath(resolved, { distro: ctx.config.distro });
@@ -66,6 +67,7 @@ export function registerFilesystemTools(server, ctx) {
     "get_path_info",
     "Retorna tipo, tamanho e datas de um caminho permitido do WSL.",
     { path: z.string().min(1) },
+    { readOnlyHint: true },
     async ({ path: requested }) => {
       const resolved = resolveFsPath(requested, ctx);
       const stats = await fs.lstat(
@@ -94,6 +96,7 @@ export function registerFilesystemTools(server, ctx) {
       path: z.string().min(1),
       maxChars: z.number().int().positive().max(500000).optional(),
     },
+    { readOnlyHint: true },
     async ({ path: requested, maxChars }) => {
       const resolved = resolveFsPath(requested, ctx);
       const hostPath = toHostPath(resolved, { distro: ctx.config.distro });
@@ -118,6 +121,7 @@ export function registerFilesystemTools(server, ctx) {
       overwrite: z.boolean().optional(),
       createParents: z.boolean().optional(),
     },
+    { readOnlyHint: false, destructiveHint: true },
     async ({ path: requested, content, overwrite, createParents }) => {
       const resolved = resolveFsPath(requested, ctx);
       const hostPath = toHostPath(resolved, { distro: ctx.config.distro });
@@ -152,6 +156,7 @@ export function registerFilesystemTools(server, ctx) {
       path: z.string().min(1),
       recursive: z.boolean().optional(),
     },
+    { readOnlyHint: false, destructiveHint: false },
     async ({ path: requested, recursive }) => {
       const resolved = resolveFsPath(requested, ctx);
       const hostPath = toHostPath(resolved, { distro: ctx.config.distro });

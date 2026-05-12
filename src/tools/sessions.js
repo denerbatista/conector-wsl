@@ -25,6 +25,7 @@ export function registerSessionTools(server, ctx) {
       cwd: z.string().min(1).optional(),
       label: z.string().min(1).max(80).optional(),
     },
+    { readOnlyHint: false, destructiveHint: false },
     async ({ cwd, label }) => {
       const resolvedCwd = resolveCwd(cwd, ctx);
       const session = makeSession({ cwd: resolvedCwd, label });
@@ -51,6 +52,7 @@ export function registerSessionTools(server, ctx) {
       command: z.string().min(1),
       timeoutMs: z.number().int().positive().max(600000).optional(),
     },
+    { readOnlyHint: false, destructiveHint: true },
     async ({ sessionId, command, timeoutMs }) => {
       const session = ctx.sessions.get(sessionId);
       if (!session) throw new Error(`Sessao nao encontrada: ${sessionId}`);
@@ -84,6 +86,7 @@ export function registerSessionTools(server, ctx) {
     "close_wsl_session",
     "Fecha uma sessao persistente e remove o estado salvo.",
     { sessionId: z.string().uuid() },
+    { readOnlyHint: false, destructiveHint: false },
     async ({ sessionId }) => {
       const session = ctx.sessions.get(sessionId);
       if (!session) throw new Error(`Sessao nao encontrada: ${sessionId}`);

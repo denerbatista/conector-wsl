@@ -16,6 +16,9 @@
     "url": "https://github.com/denerbatista/conector-wsl"
   },
   "license": "MIT",
+  "privacy_policies": [
+    "https://github.com/denerbatista/conector-wsl#privacy-policy"
+  ],
   "compatibility": {
     "platforms": ["win32", "linux"],
     "runtimes": {
@@ -25,47 +28,64 @@
   "tools": [
     {
       "name": "connector_status",
-      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao)."
+      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao).",
+      "readOnlyHint": true
     },
     {
       "name": "list_allowed_roots",
-      "description": "Lista os caminhos liberados para terminal e filesystem."
+      "description": "Lista os caminhos liberados para terminal e filesystem.",
+      "readOnlyHint": true
     },
     {
       "name": "list_directory",
-      "description": "Lista o conteudo de um diretorio permitido."
+      "description": "Lista o conteudo de um diretorio permitido.",
+      "readOnlyHint": true
     },
     {
       "name": "get_path_info",
-      "description": "Mostra tipo, tamanho e datas de um caminho permitido."
+      "description": "Mostra tipo, tamanho e datas de um caminho permitido.",
+      "readOnlyHint": true
     },
     {
       "name": "read_text_file",
-      "description": "Le o conteudo de um arquivo de texto no WSL."
+      "description": "Le o conteudo de um arquivo de texto no WSL.",
+      "readOnlyHint": true
     },
     {
       "name": "write_text_file",
-      "description": "Escreve um arquivo de texto no WSL."
+      "description": "Escreve um arquivo de texto no WSL.",
+      "readOnlyHint": false,
+      "destructiveHint": true
     },
     {
       "name": "create_directory",
-      "description": "Cria um diretorio dentro das roots permitidas."
+      "description": "Cria um diretorio dentro das roots permitidas.",
+      "readOnlyHint": false,
+      "destructiveHint": false
     },
     {
       "name": "run_wsl_command",
-      "description": "Executa um comando avulso no WSL."
+      "description": "Executa um comando avulso no WSL.",
+      "readOnlyHint": false,
+      "destructiveHint": true
     },
     {
       "name": "start_wsl_session",
-      "description": "Abre uma sessao persistente de terminal WSL."
+      "description": "Abre uma sessao persistente de terminal WSL.",
+      "readOnlyHint": false,
+      "destructiveHint": false
     },
     {
       "name": "run_in_wsl_session",
-      "description": "Executa um comando dentro de uma sessao persistente."
+      "description": "Executa um comando dentro de uma sessao persistente.",
+      "readOnlyHint": false,
+      "destructiveHint": true
     },
     {
       "name": "close_wsl_session",
-      "description": "Fecha uma sessao persistente."
+      "description": "Fecha uma sessao persistente.",
+      "readOnlyHint": false,
+      "destructiveHint": false
     }
   ],
   "user_config": {
