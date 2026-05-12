@@ -15,8 +15,9 @@ coverage/
 # Docs auxiliares (README + LICENSE + CHANGELOG ficam)
 CONTRIBUTING.md
 
-# Build artefatos
-dist/
+# Build artefatos do projeto. Use caminhos ancorados para nao remover
+# dist/ de dependencias em node_modules, como @modelcontextprotocol/sdk/dist.
+/dist/
 *.mcpb
 
 # Logs/backups
@@ -25,6 +26,7 @@ dist/
 *.backup-*
 *.orig
 debug.log
+node_modules/.vite/
 
 # OS
 .DS_Store

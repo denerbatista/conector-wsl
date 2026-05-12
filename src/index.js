@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -25,11 +28,17 @@ export async function bootServer({ env = process.env } = {}) {
   return { server, ctx };
 }
 
-// Auto-boot quando executado direto (entry MCP).
+function normalizeEntryPath(value) {
+  return path.resolve(value || "").replace(/\\/g, "/").toLowerCase();
+}
+
+// Auto-boot quando executado direto (entry MCP), independente de / vs \.
+const currentModulePath = normalizeEntryPath(fileURLToPath(import.meta.url));
+const invokedPath = normalizeEntryPath(process.argv[1]);
 const isMainModule =
-  import.meta.url === `file://${process.argv[1]}` ||
-  process.argv[1]?.endsWith("src/index.js") ||
-  process.argv[1]?.endsWith("server/index.js");
+  currentModulePath === invokedPath ||
+  invokedPath.endsWith("/src/index.js") ||
+  invokedPath.endsWith("/server/index.js");
 
 if (isMainModule) {
   bootServer().catch((err) => {

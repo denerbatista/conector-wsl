@@ -1,6 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { Buffer } from "node:buffer";
 
 import { log } from "./log.js";
 
@@ -27,29 +28,39 @@ export function detectDistro(override) {
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 10000,
     });
-    // wsl.exe imprime UTF-16 LE
-    const out = buf.toString("utf16le").replace(/ /g, "");
-    const lines = out
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
-    // procurar entrada com '*' (default)
-    for (const line of lines.slice(1)) {
-      if (line.startsWith("*")) {
-        const name = line.replace(/^\*\s+/, "").split(/\s+/)[0];
-        if (name) return name;
-      }
-    }
-    // fallback: primeira distro listada (pula header NAME)
-    for (const line of lines.slice(1)) {
-      const name = line.replace(/^\*?\s+/, "").split(/\s+/)[0];
-      if (name && name.toUpperCase() !== "NAME") return name;
-    }
+    const detected = parseWslListVerbose(buf);
+    if (detected) return detected;
   } catch (err) {
     log.warn("detect.distro.fail", { error: String(err?.message || err) });
   }
 
   return "Ubuntu";
+}
+
+export function parseWslListVerbose(bufferOrText) {
+  const text = Buffer.isBuffer(bufferOrText)
+    ? bufferOrText.toString("utf16le")
+    : String(bufferOrText || "");
+
+  const lines = text
+    .replace(/\0/g, "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const entries = lines.filter((line) => !/^NAME\s+STATE\s+VERSION$/i.test(line));
+  const parseName = (line) => line.replace(/^\*\s*/, "").trim().split(/\s+/)[0];
+
+  const defaultLine = entries.find((line) => line.startsWith("*"));
+  const defaultName = defaultLine ? parseName(defaultLine) : "";
+  if (defaultName) return defaultName;
+
+  for (const line of entries) {
+    const name = parseName(line);
+    if (name && name.toUpperCase() !== "NAME") return name;
+  }
+
+  return "";
 }
 
 /**

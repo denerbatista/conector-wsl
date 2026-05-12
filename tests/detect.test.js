@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { Buffer } from "node:buffer";
 
 const ORIGINAL_PLATFORM = process.platform;
 const ORIGINAL_ENV = { ...process.env };
@@ -56,6 +57,32 @@ describe("detect.detectDistro", () => {
     Object.defineProperty(process, "platform", { value: "linux" });
     const { detectDistro } = await import("../src/detect.js");
     expect(detectDistro(undefined)).toBe("");
+  });
+});
+
+describe("detect.parseWslListVerbose", () => {
+  it("detecta distro default marcada com asterisco", async () => {
+    const { parseWslListVerbose } = await import("../src/detect.js");
+    const output = [
+      "  NAME                   STATE           VERSION",
+      "* Ubuntu-24.04           Running         2",
+      "  Debian                 Stopped         2",
+    ].join("\r\n");
+
+    expect(parseWslListVerbose(Buffer.from(output, "utf16le"))).toBe(
+      "Ubuntu-24.04",
+    );
+  });
+
+  it("usa a primeira distro quando nenhuma esta marcada como default", async () => {
+    const { parseWslListVerbose } = await import("../src/detect.js");
+    const output = [
+      "  NAME                   STATE           VERSION",
+      "  Ubuntu                 Stopped         2",
+      "  Debian                 Stopped         2",
+    ].join("\n");
+
+    expect(parseWslListVerbose(output)).toBe("Ubuntu");
   });
 });
 
