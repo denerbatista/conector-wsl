@@ -25,7 +25,7 @@
     "lint": "eslint src tests",
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"*.json\" \"*.md\"",
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.json\" \"*.md\"",
-    "package": "mcpb pack",
+    "package": "bash scripts/pack.sh",
     "prepublishOnly": "npm run lint && npm test"
   },
   "keywords": [

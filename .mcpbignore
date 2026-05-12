@@ -1,0 +1,34 @@
+# Source control / IDE
+.git/
+.github/
+.idea/
+.vscode/
+
+# Tests & dev configs (nao precisam no bundle final)
+tests/
+vitest.config.js
+eslint.config.js
+.prettierrc.json
+coverage/
+.nyc_output/
+
+# Docs auxiliares (README + LICENSE + CHANGELOG ficam)
+CONTRIBUTING.md
+
+# Build artefatos
+dist/
+*.mcpb
+
+# Logs/backups
+*.log
+*.bak
+*.backup-*
+*.orig
+debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lockfile vai junto, mas package-lock auxiliar nao
+.npm-install.*
