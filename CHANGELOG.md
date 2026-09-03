@@ -2,6 +2,25 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.1] - 2026-09-03
+
+### Corrigido
+
+- **Variaveis de shell sumiam em `run_wsl_command` no Windows** (`for c in a b; do $c; done` rodava
+  com `$c` vazio; `$HOME`, `$(...)` idem). Causa: o conector chamava `wsl.exe -d <distro> -- bash -lc
+  <script>` e o `--` faz o wsl.exe repassar a linha ao **shell padrao da distro**, que expandia as
+  variaveis e re-tokenizava as aspas antes do `bash -lc` receber o script. Agora usa `wsl.exe -d
+  <distro> --exec bash -lc <script>`: os argumentos chegam intactos ao bash. Reportado na auditoria
+  do plugin impacta-dev 0.5.3 (Cowork). Sem efeito em Linux nativo/WSL (usa `/bin/bash -lc`).
+- `buildWslArgs` exportado e coberto por testes.
+- **Modo `auto` caia em `silent` no Cowork.** O Cowork (Claude Desktop) se identifica como
+  `claude-code` no handshake MCP, igual ao CLI — o nome do cliente nao separa os dois. Agora a
+  decisao usa a **plataforma**: processo no Windows (`win32`) → `full` (Cowork sobe o conector via
+  `npx` no Windows); Linux + `claude-code` → `silent` (CLI no WSL); qualquer outro → `full`.
+- Instalacao global (`npm install -g`) passa a registrar `env: {WSL_CONNECTOR_MODE: "full"}` na
+  entrada do `claude_desktop_config.json` (e o `entriesEqual` compara `env`, entao atualiza quem
+  ja tinha a entrada). `.mcpb`: campo "Modo" com default `full`. Claude Desktop e sempre full.
+
 ## [0.5.0] - 2026-09-03
 
 ### Adicionado

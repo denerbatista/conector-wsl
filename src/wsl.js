@@ -18,10 +18,16 @@ export function buildShellScript({ cwd, prelude = "", body }) {
   return parts.join("\n");
 }
 
-function buildWslArgs(script, distro) {
+/**
+ * Args do wsl.exe. Usa `--exec` (nao `--`): com `--` o wsl.exe repassa a linha ao
+ * shell padrao da distro, que expande `$var`, `$(...)` e re-tokeniza aspas ANTES do
+ * `bash -lc` receber o script — `for c in a b; do $c; done` chegava com `$c` vazio.
+ * `--exec` entrega os argumentos intactos ao bash.
+ */
+export function buildWslArgs(script, distro) {
   const args = [];
-  if (distro) args.push("-d", distro, "--");
-  args.push("bash", "-lc", script);
+  if (distro) args.push("-d", distro);
+  args.push("--exec", "bash", "-lc", script);
   return args;
 }
 

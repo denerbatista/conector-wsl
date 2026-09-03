@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "claude-wsl-terminal-connector",
   "display_name": "WSL + Windows Workspace Connector",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Expoe terminal e filesystem do WSL e PowerShell do Windows para o Claude Desktop/Cowork via MCP, com auto-deteccao zero-config e modo silencioso para o Claude Code.",
   "long_description": "Conector MCP local que da ao Claude acesso controlado a sua maquina: executar comandos no WSL e no Windows (PowerShell), manter sessoes de terminal com cwd preservado, abrir arquivos/pastas/URLs no Windows e ler/escrever arquivos dentro das pastas liberadas. Detecta automaticamente a distro WSL, o usuario Linux e o usuario Windows, e libera /home/<linux-user> e /mnt/c/Users/<windows-user>. Quando o cliente e o Claude Code (que ja tem terminal proprio), entra em modo silencioso e registra so o status — pode ser carregado por um plugin sem gastar contexto.",
   "author": {
@@ -135,9 +135,9 @@
     "mode": {
       "type": "string",
       "title": "Modo (opcional)",
-      "description": "auto (padrao): full para Claude Desktop/Cowork, silent para Claude Code. Force com full ou silent.",
+      "description": "full (padrao no Claude Desktop/Cowork: todas as tools) | silent (so status) | auto (decide por plataforma/cliente).",
       "required": false,
-      "default": ""
+      "default": "full"
     }
   },
   "server": {

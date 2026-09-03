@@ -47,7 +47,11 @@ export async function bootServer({ env = process.env } = {}) {
   server.server.oninitialized = () => {
     const client = server.server.getClientVersion();
     ctx.runtime.clientName = client?.name ?? null;
-    ctx.runtime.mode = decideMode({ env, clientName: ctx.runtime.clientName });
+    ctx.runtime.mode = decideMode({
+      env,
+      clientName: ctx.runtime.clientName,
+      platform: process.platform,
+    });
 
     if (ctx.runtime.mode === "full") {
       registerFullTools(server, ctx, { env });

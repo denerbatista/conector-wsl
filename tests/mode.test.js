@@ -49,10 +49,21 @@ describe("normalizeMode / isCliClient", () => {
 });
 
 describe("decideMode", () => {
-  it("auto: claude-code -> silent; outros -> full", () => {
-    expect(decideMode({ env: {}, clientName: "claude-code" })).toBe("silent");
-    expect(decideMode({ env: {}, clientName: "claude-ai" })).toBe("full");
-    expect(decideMode({ env: {}, clientName: null })).toBe("full");
+  const linux = { platform: "linux" };
+  it("auto/Linux: claude-code -> silent; outros -> full", () => {
+    expect(decideMode({ env: {}, clientName: "claude-code", ...linux })).toBe(
+      "silent",
+    );
+    expect(decideMode({ env: {}, clientName: "claude-ai", ...linux })).toBe(
+      "full",
+    );
+    expect(decideMode({ env: {}, clientName: null, ...linux })).toBe("full");
+  });
+
+  it("auto/Windows: full mesmo com cliente claude-code (Cowork se identifica assim)", () => {
+    expect(
+      decideMode({ env: {}, clientName: "claude-code", platform: "win32" }),
+    ).toBe("full");
   });
 
   it("env forca o modo", () => {

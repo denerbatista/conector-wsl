@@ -127,7 +127,8 @@ function getConfigPath() {
   }
 
   if (plat === "win32") {
-    const appData = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
+    const appData =
+      process.env.APPDATA || join(homedir(), "AppData", "Roaming");
     return join(appData, "Claude", "claude_desktop_config.json");
   }
 
@@ -271,7 +272,8 @@ function entriesEqual(a, b) {
   if (a.command !== b.command) return false;
   const aArgs = JSON.stringify(a.args || []);
   const bArgs = JSON.stringify(b.args || []);
-  return aArgs === bArgs;
+  if (aArgs !== bArgs) return false;
+  return JSON.stringify(a.env || {}) === JSON.stringify(b.env || {});
 }
 
 // ------------------------------------------------------------------- main ---
@@ -280,11 +282,18 @@ try {
   const configPath = getConfigPath();
 
   if (!configPath) {
-    warn("Sistema nao suportado para auto-configuracao. Configure manualmente.");
+    warn(
+      "Sistema nao suportado para auto-configuracao. Configure manualmente.",
+    );
     process.exit(0);
   }
 
-  const desiredEntry = resolveCommandEntry();
+  // Instalacao global = Claude Desktop/Cowork: sempre modo full (todas as tools).
+  // A autodeteccao ja cobre o Windows; o env garante o caso "bin dentro do WSL via wsl.exe".
+  const desiredEntry = {
+    ...resolveCommandEntry(),
+    env: { WSL_CONNECTOR_MODE: "full" },
+  };
   const config = readConfig(configPath);
   if (!config.mcpServers) config.mcpServers = {};
 

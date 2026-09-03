@@ -1,5 +1,27 @@
 import { describe, it, expect } from "vitest";
-import { shellEscape, buildShellScript } from "../src/wsl.js";
+import { shellEscape, buildShellScript, buildWslArgs } from "../src/wsl.js";
+
+describe("buildWslArgs", () => {
+  it("usa --exec para o script chegar intacto ao bash (sem expansao do shell do WSL)", () => {
+    const script = 'for c in git gh; do $c --version; done; echo "$HOME"';
+    expect(buildWslArgs(script, "Ubuntu-24.04")).toEqual([
+      "-d",
+      "Ubuntu-24.04",
+      "--exec",
+      "bash",
+      "-lc",
+      script,
+    ]);
+  });
+
+  it("sem distro omite -d mas mantem --exec", () => {
+    expect(buildWslArgs("ls", "")).toEqual(["--exec", "bash", "-lc", "ls"]);
+  });
+
+  it("nunca usa o separador -- (que passa pelo shell padrao)", () => {
+    expect(buildWslArgs("ls", "Ubuntu")).not.toContain("--");
+  });
+});
 
 describe("shellEscape", () => {
   it("envolve em aspas simples", () => {

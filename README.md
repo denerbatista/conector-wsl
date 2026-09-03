@@ -95,7 +95,7 @@ Declare no `.mcp.json` do plugin e o conector sobe junto com ele (exige Node >= 
 }
 ```
 
-No Cowork (Windows) ele entra em modo full; no Claude Code (WSL) em modo silent.
+No Cowork (Windows) ele entra em modo full pela plataforma; no Claude Code (WSL) em modo silent.
 
 ## Como funciona
 
