@@ -39,13 +39,14 @@ Funciona em WSL, Windows nativo, macOS e Linux.
 
 Todos os campos sao opcionais — o conector detecta tudo automaticamente. Se quiser sobrescrever:
 
-| Campo           | Padrao auto-detectado                        | Quando preencher                    |
-| --------------- | -------------------------------------------- | ----------------------------------- |
-| `default_cwd`   | `/home/<linux-user>`                         | Quer comecar em outra pasta         |
-| `allowed_roots` | `/home/<linux-user>:/mnt/c/Users/<win-user>` | Quer abrir mais ou menos diretorios |
-| `wsl_distro`    | Distro com `*` em `wsl --list --verbose`     | Tem multiplas distros e quer fixar  |
-| `timeout_ms`    | `120000`                                     | Comandos longos / curtos            |
-| `mode`          | `auto`                                       | Forcar `full` ou `silent`           |
+| Campo                         | Padrao auto-detectado                        | Quando preencher                         |
+| ----------------------------- | -------------------------------------------- | ---------------------------------------- |
+| `default_cwd`                 | `/home/<linux-user>`                         | Quer comecar em outra pasta              |
+| `allowed_roots`               | `/home/<linux-user>:/mnt/c/Users/<win-user>` | Quer abrir mais ou menos diretorios      |
+| `wsl_distro`                  | Distro com `*` em `wsl --list --verbose`     | Tem multiplas distros e quer fixar       |
+| `timeout_ms`                  | `120000`                                     | Comandos longos / curtos                 |
+| `mode`                        | `auto`                                       | Forcar `full` ou `silent`                |
+| `WSL_CONNECTOR_PREWARM` (env) | vazio                                        | MCPs `npx` a pre-aquecer (`pkg@ver ...`) |
 
 ## Ferramentas expostas
 
@@ -81,16 +82,36 @@ O Claude Code roda dentro do WSL e ja tem Bash — as tools seriam redundantes e
 
 ### Uso em plugin do Claude Code / Cowork
 
-Declare no `.mcp.json` do plugin e o conector sobe junto com ele (exige Node >= 20 na maquina):
+**Recomendado — embutido (sem npx, sem cold start):** gere o bundle e copie para o plugin.
+
+```bash
+npm run bundle                      # dist/wsl-connector.mjs (~740 KB, ESM, Node >= 20)
+cp dist/wsl-connector.mjs <plugin>/vendor/
+```
 
 ```json
 {
   "mcpServers": {
     "wsl-workspace": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "claude-wsl-terminal-connector@latest"]
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/vendor/wsl-connector.mjs"],
+      "env": { "WSL_CONNECTOR_PREWARM": "chrome-devtools-mcp@1.8.0" }
     }
+  }
+}
+```
+
+`WSL_CONNECTOR_PREWARM` (opcional) lista outros MCPs `npx` do plugin que o conector aquece em segundo plano no primeiro start em modo full — evita que o Cowork estoure 30 s neles em cache frio.
+
+**Alternativa — via npx** (sobe da rede; em cache frio pode passar do timeout do Cowork):
+
+```json
+{
+  "wsl-workspace": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "claude-wsl-terminal-connector@0.5.3"]
   }
 }
 ```

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -10,13 +9,11 @@ import { resolveConfig } from "./config.js";
 import { createSessionStore } from "./sessions.js";
 import { registerCoreTools, registerFullTools } from "./tools/index.js";
 import { decideMode } from "./mode.js";
+import { runPrewarm } from "./prewarm.js";
 import { log } from "./log.js";
+import { PKG_NAME, PKG_VERSION } from "./version.js";
 
-const require = createRequire(import.meta.url);
-const pkg = require("../package.json");
-
-export const PKG_NAME = pkg.name;
-export const PKG_VERSION = pkg.version;
+export { PKG_NAME, PKG_VERSION };
 
 export function createRuntime() {
   return {
@@ -55,6 +52,13 @@ export async function bootServer({ env = process.env } = {}) {
 
     if (ctx.runtime.mode === "full") {
       registerFullTools(server, ctx, { env });
+      // Aquece o cache do npx de outros MCPs do plugin (ex.: chrome-devtools-mcp),
+      // em segundo plano, uma vez por spec. Ver src/prewarm.js.
+      try {
+        runPrewarm({ env });
+      } catch (err) {
+        log.warn("prewarm.fail", { error: String(err?.message || err) });
+      }
     }
 
     log.info("server.initialized", {
@@ -86,7 +90,25 @@ const isMainModule =
   currentModulePath === invokedPath ||
   invokedPath.endsWith("/src/index.js") ||
   invokedPath.endsWith("/server/index.js") ||
-  invokedPath.endsWith("/claude-wsl-terminal-connector");
+  invokedPath.endsWith("/claude-wsl-terminal-connector") ||
+  invokedPath.endsWith("/wsl-connector.mjs") ||
+  invokedPath.endsWith("/wsl-connector.js");
+
+const cliArgs = process.argv.slice(2);
+if (isMainModule && (cliArgs.includes("--version") || cliArgs.includes("-v"))) {
+  process.stdout.write(`${PKG_VERSION}\n`);
+  process.exit(0);
+}
+if (isMainModule && (cliArgs.includes("--help") || cliArgs.includes("-h"))) {
+  process.stdout.write(
+    `${PKG_NAME} ${PKG_VERSION} — servidor MCP (stdio). Sem argumentos: inicia o servidor.\n` +
+      `  --version   imprime a versao e sai\n  --help      esta ajuda\n` +
+      `Env: WSL_CONNECTOR_MODE=auto|full|silent, WSL_CONNECTOR_PREWARM="pkg@ver ...",\n` +
+      `     WSL_CONNECTOR_DISTRO, WSL_CONNECTOR_DEFAULT_CWD, WSL_CONNECTOR_ALLOWED_ROOTS,\n` +
+      `     WSL_CONNECTOR_TIMEOUT_MS, WSL_CONNECTOR_POWERSHELL\n`,
+  );
+  process.exit(0);
+}
 
 if (isMainModule) {
   bootServer().catch((err) => {

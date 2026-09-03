@@ -1,6 +1,6 @@
 {
   "name": "claude-wsl-terminal-connector",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "MCP connector that exposes a controlled WSL terminal and filesystem to Claude/Cowork, with zero-config auto-detection.",
   "type": "module",
   "engines": {
@@ -18,7 +18,8 @@
     "manifest.json",
     "LICENSE",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "scripts/sync-version.js"
   ],
   "scripts": {
     "start": "node ./src/index.js",
@@ -29,8 +30,10 @@
     "lint": "eslint src tests",
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"*.json\" \"*.md\"",
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.json\" \"*.md\"",
-    "package": "bash scripts/pack.sh",
-    "prepublishOnly": "npm run lint && npm test"
+    "package": "npm run bundle && bash scripts/pack.sh",
+    "prepublishOnly": "npm run lint && npm test",
+    "version": "node scripts/sync-version.js && git add src/version.js manifest.json",
+    "bundle": "esbuild src/index.js --bundle --platform=node --target=node20 --format=esm --outfile=dist/wsl-connector.mjs --log-level=warning"
   },
   "keywords": [
     "anthropic",
@@ -52,6 +55,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
+    "esbuild": "^0.24.2",
     "eslint": "^9.18.0",
     "prettier": "^3.4.2",
     "vitest": "^2.1.8"

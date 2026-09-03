@@ -48,8 +48,14 @@ export function parseWslListVerbose(bufferOrText) {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  const entries = lines.filter((line) => !/^NAME\s+STATE\s+VERSION$/i.test(line));
-  const parseName = (line) => line.replace(/^\*\s*/, "").trim().split(/\s+/)[0];
+  const entries = lines.filter(
+    (line) => !/^NAME\s+STATE\s+VERSION$/i.test(line),
+  );
+  const parseName = (line) =>
+    line
+      .replace(/^\*\s*/, "")
+      .trim()
+      .split(/\s+/)[0];
 
   const defaultLine = entries.find((line) => line.startsWith("*"));
   const defaultName = defaultLine ? parseName(defaultLine) : "";

@@ -2,6 +2,29 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.3] - 2026-09-03
+
+### Adicionado
+
+- **Bundle unico para embutir em plugins**: `npm run bundle` gera `dist/wsl-connector.mjs` (esbuild,
+  ~740 KB, ESM, Node >= 20, sem dependencias externas). Um plugin do Claude Code/Cowork pode
+  declarar `"command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/vendor/wsl-connector.mjs"]` e o
+  conector sobe em < 1 s, sem `npx`, sem rede e sem cold start — resolve o timeout de 30 s do Cowork
+  na primeira sessao apos atualizar o plugin. O `npm run package` (.mcpb) tambem gera o bundle.
+- **Pre-aquecimento de outros MCPs** (`WSL_CONNECTOR_PREWARM="pkg@ver ..."`): em modo full, apos o
+  handshake, roda `npx -y <spec> --help` desacoplado (detached, uma vez por spec, marker em
+  `~/.claude-wsl-connector/prewarm.json`). Serve para o plugin aquecer o cache do
+  `chrome-devtools-mcp` de dentro do proprio Cowork, sem depender do CLI nem do usuario.
+- Flags `--version`/`-v` e `--help`/`-h` no binario (imprimem e saem). O `--help` deixa de ficar
+  pendurado — util para pre-aquecer sem `< nul`.
+
+### Mudou
+
+- Versao passa a vir de `src/version.js` (sincronizado com `package.json` pelo hook `npm version` →
+  `scripts/sync-version.js`, que tambem atualiza `manifest.json`), em vez de `require("../package.json")`
+  — necessario para o bundle. `isMainModule` reconhece `wsl-connector.mjs`.
+- Testes 87 -> 95.
+
 ## [0.5.2] - 2026-09-03
 
 ### Corrigido
