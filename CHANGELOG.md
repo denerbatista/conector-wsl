@@ -2,6 +2,17 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.2] - 2026-09-03
+
+### Corrigido
+
+- **Ruido `chdir failed` no stderr do `wsl.exe` (Cowork).** O `wsl.exe` herda o cwd do processo
+  pai e tenta entrar nele dentro do Linux; no Cowork o pai roda na pasta da sessao
+  (`...\outputs`), inexistente do lado Linux, e o wsl.exe logava o erro antes de cair na home. Os
+  processos filhos (`wsl.exe` e `powershell.exe`) agora sao iniciados de um diretorio que existe
+  (`%USERPROFILE%` → home → `%SystemRoot%` → `C:\`), via `safeSpawnCwd`. O script ja faz o proprio
+  `cd`, entao o comportamento nao muda — so o ruido some. Sem efeito em Linux nativo.
+
 ## [0.5.1] - 2026-09-03
 
 ### Corrigido

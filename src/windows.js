@@ -6,6 +6,7 @@ import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 
 import { truncateText } from "./filesystem.js";
+import { safeSpawnCwd } from "./wsl.js";
 
 const MNT_RE = /^\/mnt\/([a-z])(\/.*)?$/i;
 const DRIVE_RE = /^([a-zA-Z]):(\\.*)?$/;
@@ -184,6 +185,7 @@ export async function executePowerShell({
   ];
 
   const child = spawnImpl(powershell, args, {
+    cwd: safeSpawnCwd(),
     env: { ...process.env, HOME: process.env.HOME || os.homedir() },
     windowsHide: true,
   });

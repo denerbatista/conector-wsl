@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import os from "node:os";
 import { spawn } from "node:child_process";
 
@@ -32,6 +33,33 @@ export function buildWslArgs(script, distro) {
 }
 
 /**
+ * Diretorio a partir do qual os processos filhos sao iniciados.
+ *
+ * O wsl.exe herda o cwd do processo pai e tenta entrar nele dentro do Linux. No
+ * Cowork o pai roda na pasta da sessao (ex.: ...\outputs), que nao existe do lado
+ * Linux -> o wsl.exe loga "chdir failed" no stderr antes de cair na home. O script
+ * ja faz o proprio `cd`, entao iniciamos sempre de um diretorio que existe.
+ */
+export function safeSpawnCwd({
+  env = process.env,
+  platform = process.platform,
+  exists = fs.existsSync,
+  homedir = os.homedir,
+} = {}) {
+  if (platform !== "win32") return undefined;
+  const candidates = [env.USERPROFILE, homedir(), env.SystemRoot, "C:\\"];
+  for (const dir of candidates) {
+    if (!dir) continue;
+    try {
+      if (exists(dir)) return dir;
+    } catch {
+      /* tenta o proximo */
+    }
+  }
+  return undefined;
+}
+
+/**
  * Executa um script bash com timeout e captura stdout/stderr.
  * No Windows usa wsl.exe; em Linux nativo usa /bin/bash.
  */
@@ -40,11 +68,13 @@ export async function executeBashScript({
   timeoutMs,
   maxOutputChars,
   distro,
+  spawnImpl = spawn,
 }) {
   const command = IS_WINDOWS ? "wsl.exe" : "/bin/bash";
   const args = IS_WINDOWS ? buildWslArgs(script, distro) : ["-lc", script];
 
-  const child = spawn(command, args, {
+  const child = spawnImpl(command, args, {
+    cwd: safeSpawnCwd(),
     env: { ...process.env, HOME: process.env.HOME || os.homedir() },
   });
 
