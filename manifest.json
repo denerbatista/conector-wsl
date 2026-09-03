@@ -1,14 +1,24 @@
 {
   "manifest_version": "0.3",
   "name": "claude-wsl-terminal-connector",
-  "display_name": "WSL Workspace Connector",
-  "version": "0.3.0",
-  "description": "Expoe terminal e filesystem do WSL para o Claude Desktop/Cowork via MCP, com auto-deteccao zero-config.",
-  "long_description": "Conector MCP local que da ao Claude acesso controlado ao seu WSL: executar comandos, manter sessao de terminal com cwd e variaveis preservadas, e ler/escrever arquivos dentro das pastas liberadas. Por padrao detecta automaticamente a distro WSL, o usuario Linux e o usuario Windows, e libera /home/<linux-user> e /mnt/c/Users/<windows-user>. Tudo pode ser sobrescrito na tela de configuracao.",
+  "display_name": "WSL + Windows Workspace Connector",
+  "version": "0.5.0",
+  "description": "Expoe terminal e filesystem do WSL e PowerShell do Windows para o Claude Desktop/Cowork via MCP, com auto-deteccao zero-config e modo silencioso para o Claude Code.",
+  "long_description": "Conector MCP local que da ao Claude acesso controlado a sua maquina: executar comandos no WSL e no Windows (PowerShell), manter sessoes de terminal com cwd preservado, abrir arquivos/pastas/URLs no Windows e ler/escrever arquivos dentro das pastas liberadas. Detecta automaticamente a distro WSL, o usuario Linux e o usuario Windows, e libera /home/<linux-user> e /mnt/c/Users/<windows-user>. Quando o cliente e o Claude Code (que ja tem terminal proprio), entra em modo silencioso e registra so o status — pode ser carregado por um plugin sem gastar contexto.",
   "author": {
     "name": "Dener Batista"
   },
-  "keywords": ["claude", "cowork", "filesystem", "mcp", "terminal", "wsl"],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cowork",
+    "filesystem",
+    "mcp",
+    "powershell",
+    "terminal",
+    "windows",
+    "wsl"
+  ],
   "homepage": "https://github.com/denerbatista/conector-wsl",
   "documentation": "https://github.com/denerbatista/conector-wsl#readme",
   "repository": {
@@ -28,7 +38,7 @@
   "tools": [
     {
       "name": "connector_status",
-      "description": "Mostra o status da configuracao ativa do conector (distro, cwd, roots, auto-deteccao)."
+      "description": "Mostra o status do conector: modo (full/silent), cliente MCP, distro, cwd, roots e disponibilidade do PowerShell."
     },
     {
       "name": "list_allowed_roots",
@@ -69,6 +79,26 @@
     {
       "name": "close_wsl_session",
       "description": "Fecha uma sessao persistente."
+    },
+    {
+      "name": "run_windows_command",
+      "description": "Executa um comando PowerShell no Windows (host)."
+    },
+    {
+      "name": "start_windows_session",
+      "description": "Abre uma sessao persistente de PowerShell (preserva cwd)."
+    },
+    {
+      "name": "run_in_windows_session",
+      "description": "Executa um comando dentro de uma sessao PowerShell."
+    },
+    {
+      "name": "close_windows_session",
+      "description": "Fecha uma sessao PowerShell."
+    },
+    {
+      "name": "open_in_windows",
+      "description": "Abre arquivo, pasta ou URL no Windows com o app padrao ou um app informado."
     }
   ],
   "user_config": {
@@ -101,6 +131,13 @@
       "min": 1000,
       "max": 600000,
       "required": false
+    },
+    "mode": {
+      "type": "string",
+      "title": "Modo (opcional)",
+      "description": "auto (padrao): full para Claude Desktop/Cowork, silent para Claude Code. Force com full ou silent.",
+      "required": false,
+      "default": ""
     }
   },
   "server": {
@@ -113,7 +150,8 @@
         "WSL_CONNECTOR_DEFAULT_CWD": "${user_config.default_cwd}",
         "WSL_CONNECTOR_ALLOWED_ROOTS": "${user_config.allowed_roots}",
         "WSL_CONNECTOR_DISTRO": "${user_config.wsl_distro}",
-        "WSL_CONNECTOR_TIMEOUT_MS": "${user_config.timeout_ms}"
+        "WSL_CONNECTOR_TIMEOUT_MS": "${user_config.timeout_ms}",
+        "WSL_CONNECTOR_MODE": "${user_config.mode}"
       }
     }
   }

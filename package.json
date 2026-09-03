@@ -1,6 +1,6 @@
 {
   "name": "claude-wsl-terminal-connector",
-  "version": "0.3.2",
+  "version": "0.5.0",
   "description": "MCP connector that exposes a controlled WSL terminal and filesystem to Claude/Cowork, with zero-config auto-detection.",
   "type": "module",
   "engines": {
@@ -14,6 +14,7 @@
     "src",
     "server",
     "scripts/postinstall.js",
+    "scripts/preuninstall.js",
     "manifest.json",
     "LICENSE",
     "README.md",
@@ -22,6 +23,7 @@
   "scripts": {
     "start": "node ./src/index.js",
     "postinstall": "node scripts/postinstall.js",
+    "preuninstall": "node scripts/preuninstall.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src tests",

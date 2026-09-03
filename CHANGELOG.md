@@ -2,6 +2,64 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.0] - 2026-09-03
+
+### Adicionado
+
+- **Lado Windows (PowerShell)** — o conector agora e "WSL + Windows Workspace Connector". Tools novas:
+  `run_windows_command` (PowerShell em shell nova), `start_windows_session` / `run_in_windows_session` /
+  `close_windows_session` (sessao persistente com cwd preservado) e `open_in_windows` (abre arquivo, pasta
+  ou URL com o app padrao, ou com um `app` informado — ex.: `phpstorm64.exe`). Registradas quando o
+  PowerShell esta acessivel: Windows nativo (`%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe`)
+  ou WSL com interop (`/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`). Override:
+  `WSL_CONNECTOR_POWERSHELL`.
+- **Mesma sandbox nos dois lados**: `cwd`/alvos aceitam caminho Windows (`C:\...`, `\\wsl.localhost\...`) ou
+  Linux (`/mnt/c/...`, `/home/...`) e sao validados contra `allowed_roots` pela forma Linux equivalente
+  (`toLinuxPath` / `toWindowsPath`). Sessao Windows que sai do escopo e bloqueada, como no WSL.
+- **Modo silencioso para o Claude Code**. No handshake MCP o conector le `clientInfo.name`: se for
+  `claude-code` (que roda dentro do WSL e ja tem Bash), registra so `connector_status` e
+  `list_allowed_roots` — zero custo de contexto. Qualquer outro cliente (Claude Desktop/Cowork) recebe
+  tudo. Forca com `WSL_CONNECTOR_MODE=full|silent` (env ou `user_config.mode` no `.mcpb`). Isso permite
+  declarar o conector no `.mcp.json` de um plugin do Claude Code sem penalizar o CLI.
+- `connector_status` passou a informar `mode`, `client`, `windowsTools` e `powershell`.
+- Saida do PowerShell forcada em UTF-8; comando enviado via `-EncodedCommand` (sem problemas de escape);
+  `\r` removido do stdout/stderr.
+
+### Mudou
+
+- Registro de tools em duas etapas: core antes do `connect`, resto no `initialized` (SDK
+  `oninitialized` + `getClientVersion`). `registerAllTools` continua exportado para compatibilidade.
+- Versao do servidor MCP passa a vir do `package.json` (antes estava fixa em `0.3.0` no `index.js`).
+- Testes: +35 (windows, mode, smoke em modo full/silent/override). Total 78.
+
+### Limites
+
+- Sessao Windows preserva **cwd**; variaveis, funcoes e aliases nao persistem entre comandos.
+- Sem PowerShell acessivel as tools Windows simplesmente nao aparecem (log `windows.tools.skipped`).
+
+## [0.4.0] - 2026-05-14
+
+### Corrigido
+
+- **Caminho absoluto do binario no `command`** registrado no `claude_desktop_config.json`. Antes, o postinstall gravava apenas `"claude-wsl-terminal-connector"`; como o Claude Desktop **nao herda o `PATH` do shell**, em muitos casos o conector simplesmente nao subia (falha silenciosa). Agora resolvemos via `npm prefix -g` + fallback `which` e gravamos o caminho completo.
+- **WSL -> Claude Desktop (Windows)**: quando o `npm install -g` rodava dentro do WSL mas o Claude Desktop estava no Windows, o `command` registrado nao era executavel pelo Windows. Agora gravamos `wsl.exe -d <distro> -- /caminho/absoluto/no/wsl/bin`, que e o jeito correto de invocar um binario WSL a partir do Windows.
+- **Windows nativo**: aponta agora pro `.cmd` shim absoluto que o npm cria em `%APPDATA%\npm\claude-wsl-terminal-connector.cmd`.
+
+### Adicionado
+
+- **Atualizacao automatica em vez de skip**: se a entrada `wsl-connector` ja existir no config mas com `command`/`args` diferentes (ex.: instalou v0.3.x e agora atualizou pra v0.4.0), o postinstall **atualiza** a entrada em vez de pular. Idempotencia de verdade: roda 2x identico = no-op; roda apos mudanca = update.
+- **Backup automatico** do `claude_desktop_config.json` antes de qualquer modificacao, em `claude_desktop_config.json.bak-<ISO timestamp>`.
+- **`scripts/preuninstall.js`**: ao rodar `npm uninstall -g claude-wsl-terminal-connector`, a entrada `wsl-connector` e removida do config preservando todas as outras entradas de `mcpServers` e demais chaves. Faz backup tambem.
+- **Variaveis de ambiente de controle**:
+  - `CLAUDE_WSL_SKIP_REGISTER=1` — pula o auto-registro/limpeza (util pra CI, ambientes corporativos, ou quem prefere editar config a mao).
+  - `CLAUDE_WSL_CONFIG_PATH=/caminho/customizado.json` — forca um caminho de config especifico (util pra testes e setups customizados).
+- Deteccao de `WSL_DISTRO_NAME` para registrar a flag `-d <distro>` correta na entrada.
+
+### Mudou
+
+- `detectWindowsUser()` agora usa `cmd.exe /c echo %USERPROFILE%` (mais rapido e estavel) em vez de `wsl.exe -e bash -c`.
+- O instalador **nao falha mais o `npm install`** em caso de erro de auto-configuracao: agora apenas avisa e devolve as instrucoes manuais via `console.warn`.
+
 ## [0.3.2] - 2026-05-12
 
 ### Adicionado

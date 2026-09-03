@@ -1,4 +1,4 @@
-# WSL Workspace Connector
+# WSL + Windows Workspace Connector
 
 [![CI](https://github.com/denerbatista/conector-wsl/actions/workflows/ci.yml/badge.svg)](https://github.com/denerbatista/conector-wsl/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/claude-wsl-terminal-connector.svg)](https://www.npmjs.com/package/claude-wsl-terminal-connector)
@@ -6,7 +6,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-43853d.svg)](package.json)
 [![MCPB](https://img.shields.io/badge/MCPB-0.3-0099ff.svg)](manifest.json)
 
-Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso controlado ao seu WSL**: terminal, sessao persistente e filesystem dentro das pastas que voce libera.
+Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso controlado a sua maquina**: terminal WSL, PowerShell do Windows, sessoes persistentes, abrir arquivos/URLs no Windows e filesystem dentro das pastas que voce libera. Quando o cliente e o **Claude Code** (que ja tem terminal), entra em **modo silencioso** e nao gasta contexto — pode vir embutido num plugin.
 
 ## Por que esse conector
 
@@ -14,6 +14,8 @@ Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso contro
 - **Sandbox por path.** Toda operacao de arquivo e terminal e validada contra uma lista de `allowed_roots` (`/home/<voce>` e `/mnt/c/Users/<voce>` por padrao).
 - **Sessao com cwd preservado.** `cd` e variaveis exportadas continuam valendo entre comandos da mesma sessao.
 - **Cross-host file access.** Acessa arquivos do WSL e do Windows sem o erro UNC-loop.
+- **Dois lados, uma sandbox.** Comandos WSL (bash) e Windows (PowerShell) com a mesma lista de `allowed_roots`; caminhos podem ser `C:\...`, `\\wsl.localhost\...`, `/mnt/c/...` ou `/home/...`.
+- **Modo silencioso.** Detecta o Claude Code pelo handshake MCP e registra so o status — plugins podem declara-lo sem custo no CLI.
 
 ## Instalacao
 
@@ -43,22 +45,57 @@ Todos os campos sao opcionais — o conector detecta tudo automaticamente. Se qu
 | `allowed_roots` | `/home/<linux-user>:/mnt/c/Users/<win-user>` | Quer abrir mais ou menos diretorios |
 | `wsl_distro`    | Distro com `*` em `wsl --list --verbose`     | Tem multiplas distros e quer fixar  |
 | `timeout_ms`    | `120000`                                     | Comandos longos / curtos            |
+| `mode`          | `auto`                                       | Forcar `full` ou `silent`           |
 
 ## Ferramentas expostas
 
-| Tool                 | O que faz                                                              | Hint         |
-| -------------------- | ---------------------------------------------------------------------- | ------------ |
-| `connector_status`   | Mostra config ativa, distro detectada, roots e flags de auto-deteccao. | readOnly     |
-| `list_allowed_roots` | Lista os roots autorizados.                                            | readOnly     |
-| `list_directory`     | Lista arquivos e pastas de um diretorio permitido.                     | readOnly     |
-| `get_path_info`      | Tipo, tamanho, datas de um caminho.                                    | readOnly     |
-| `read_text_file`     | Le arquivo de texto (UTF-8) com limite de tamanho.                     | readOnly     |
-| `write_text_file`    | Cria/sobrescreve arquivo de texto (UTF-8).                             | destructive  |
-| `create_directory`   | Cria diretorio (recursivo por padrao).                                 | write        |
-| `run_wsl_command`    | Executa um comando avulso em shell nova.                               | destructive  |
-| `start_wsl_session`  | Abre sessao persistente (cwd e variaveis exportadas mantidos).         | write        |
-| `run_in_wsl_session` | Executa comando dentro de sessao persistente.                          | destructive  |
-| `close_wsl_session`  | Encerra sessao.                                                        | write        |
+| Tool                     | O que faz                                                              | Hint        |
+| ------------------------ | ---------------------------------------------------------------------- | ----------- |
+| `connector_status`       | Mostra config ativa, distro detectada, roots e flags de auto-deteccao. | readOnly    |
+| `list_allowed_roots`     | Lista os roots autorizados.                                            | readOnly    |
+| `list_directory`         | Lista arquivos e pastas de um diretorio permitido.                     | readOnly    |
+| `get_path_info`          | Tipo, tamanho, datas de um caminho.                                    | readOnly    |
+| `read_text_file`         | Le arquivo de texto (UTF-8) com limite de tamanho.                     | readOnly    |
+| `write_text_file`        | Cria/sobrescreve arquivo de texto (UTF-8).                             | destructive |
+| `create_directory`       | Cria diretorio (recursivo por padrao).                                 | write       |
+| `run_wsl_command`        | Executa um comando avulso em shell nova.                               | destructive |
+| `start_wsl_session`      | Abre sessao persistente (cwd e variaveis exportadas mantidos).         | write       |
+| `run_in_wsl_session`     | Executa comando dentro de sessao persistente.                          | destructive |
+| `close_wsl_session`      | Encerra sessao.                                                        | write       |
+| `run_windows_command`    | Executa PowerShell no Windows em shell nova (`cwd` Windows ou Linux).  | destructive |
+| `start_windows_session`  | Abre sessao PowerShell persistente (preserva cwd).                     | write       |
+| `run_in_windows_session` | Executa comando dentro da sessao PowerShell.                           | destructive |
+| `close_windows_session`  | Encerra a sessao PowerShell.                                           | write       |
+| `open_in_windows`        | Abre arquivo, pasta ou URL no Windows (app padrao ou `app` informado). | write       |
+
+As tools `*_windows_*` e `open_in_windows` aparecem quando o PowerShell e encontrado: Windows nativo ou WSL com interop (`/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`). Override: `WSL_CONNECTOR_POWERSHELL`.
+
+## Modos: full x silent
+
+| Cliente MCP (`clientInfo.name`)  | Modo   | Tools                                        |
+| -------------------------------- | ------ | -------------------------------------------- |
+| Claude Desktop / Cowork / outros | full   | todas                                        |
+| `claude-code`                    | silent | so `connector_status` e `list_allowed_roots` |
+
+O Claude Code roda dentro do WSL e ja tem Bash — as tools seriam redundantes e custariam contexto em toda sessao. Force um modo com `WSL_CONNECTOR_MODE=full|silent` (env, ou campo "Modo" na config do `.mcpb`).
+
+### Uso em plugin do Claude Code / Cowork
+
+Declare no `.mcp.json` do plugin e o conector sobe junto com ele (exige Node >= 20 na maquina):
+
+```json
+{
+  "mcpServers": {
+    "wsl-workspace": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "claude-wsl-terminal-connector@latest"]
+    }
+  }
+}
+```
+
+No Cowork (Windows) ele entra em modo full; no Claude Code (WSL) em modo silent.
 
 ## Como funciona
 
@@ -92,8 +129,10 @@ Requisitos: Node 20+.
 ## Limites conhecidos
 
 - Nao cria TTY interativo real.
-- Sessoes preservam `cwd` e variaveis **exportadas**. Aliases, funcoes shell e variaveis nao exportadas nao persistem.
+- Sessoes WSL preservam `cwd` e variaveis **exportadas**. Aliases, funcoes shell e variaveis nao exportadas nao persistem.
+- Sessoes Windows (PowerShell) preservam apenas o `cwd`.
 - Arquivos sao tratados como texto UTF-8. Para binarios, use `run_wsl_command` com `cat`, `cp`, `mv`.
+- `open_in_windows` e as tools PowerShell exigem Windows ou WSL com interop; em Linux puro nao aparecem.
 
 ## Privacy Policy
 
