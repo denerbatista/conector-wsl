@@ -123,7 +123,7 @@ cp dist/wsl-connector.mjs <plugin>/vendor/
   "wsl-workspace": {
     "type": "stdio",
     "command": "npx",
-    "args": ["-y", "claude-wsl-terminal-connector@0.5.3"]
+    "args": ["-y", "claude-wsl-terminal-connector@0.6.0"]
   }
 }
 ```
