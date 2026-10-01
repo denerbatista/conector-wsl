@@ -9,6 +9,10 @@
   },
   "homepage": "https://denerbatista.github.io/conector-wsl/",
   "repository": "https://github.com/denerbatista/conector-wsl",
+  "documentationUrl": "https://denerbatista.github.io/conector-wsl/",
+  "privacyPolicyUrl": "https://denerbatista.github.io/conector-wsl/privacidade.html",
+  "termsOfServiceUrl": "https://denerbatista.github.io/conector-wsl/termos.html",
+  "supportUrl": "https://github.com/denerbatista/conector-wsl/issues",
   "license": "MIT",
   "keywords": [
     "wsl",
