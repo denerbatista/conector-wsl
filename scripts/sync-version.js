@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copia name/version do package.json para src/version.js e manifest.json.
+// Copia name/version do package.json para src/version.js, manifest.json e .claude-plugin/plugin.json.
 // Roda automaticamente no lifecycle `npm version` (ver package.json > scripts.version).
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -22,4 +22,9 @@ const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 manifest.version = pkg.version;
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
-console.warn(`[sync-version] src/version.js e manifest.json -> ${pkg.version}`);
+const pluginPath = join(root, ".claude-plugin", "plugin.json");
+const plugin = JSON.parse(readFileSync(pluginPath, "utf8"));
+plugin.version = pkg.version;
+writeFileSync(pluginPath, JSON.stringify(plugin, null, 2) + "\n");
+
+console.warn(`[sync-version] src/version.js, manifest.json e plugin.json -> ${pkg.version}`);

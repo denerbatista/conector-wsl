@@ -1,0 +1,21 @@
+{
+  "name": "conector-wsl",
+  "displayName": "WSL + Windows Workspace Connector",
+  "version": "0.6.0",
+  "description": "Terminal e arquivos do WSL e PowerShell do Windows para o Claude, com sessoes persistentes e acesso limitado as pastas que voce libera. Roda so na sua maquina, sem rede.",
+  "author": {
+    "name": "Dener Batista",
+    "url": "https://github.com/denerbatista"
+  },
+  "homepage": "https://denerbatista.github.io/conector-wsl/",
+  "repository": "https://github.com/denerbatista/conector-wsl",
+  "license": "MIT",
+  "keywords": [
+    "wsl",
+    "windows",
+    "powershell",
+    "terminal",
+    "filesystem",
+    "cowork"
+  ]
+}

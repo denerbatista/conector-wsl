@@ -7,7 +7,7 @@ export function registerStatusTools(server, ctx) {
     "connector_status",
     "Mostra como o conector foi inicializado: modo (full/silent), cliente MCP, distro WSL, roots liberados e se o lado Windows (PowerShell) esta disponivel.",
     {},
-    { readOnlyHint: true },
+    { title: "Status do conector", readOnlyHint: true },
     async () =>
       textResult(
         JSON.stringify(
@@ -42,7 +42,7 @@ export function registerStatusTools(server, ctx) {
     "list_allowed_roots",
     "Lista os diretorios liberados para terminal e filesystem (WSL e Windows).",
     {},
-    { readOnlyHint: true },
+    { title: "Listar pastas liberadas", readOnlyHint: true },
     async () =>
       textResult(
         JSON.stringify({ allowedRoots: ctx.config.allowedRoots }, null, 2),

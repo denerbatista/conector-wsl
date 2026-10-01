@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Política de Privacidade</title>
+    <meta name="description" content="Política de privacidade do WSL + Windows Workspace Connector." />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="kicker">WSL + Windows Workspace Connector</div>
+        <h1>Política de Privacidade</h1>
+        <p class="lead">Última atualização: 1º de outubro de 2026.</p>
+        <nav>
+          <a href="index.html">Documentação</a>
+          <a href="#english">English</a>
+        </nav>
+      </header>
+
+      <p>
+        O WSL + Windows Workspace Connector (“conector”) é um software de código aberto, mantido por Dener Batista,
+        que roda <strong>inteiramente na sua máquina</strong>. Ele conversa com o aplicativo do Claude pela entrada e
+        saída padrão (stdio) do próprio computador e não tem servidor, conta nem banco de dados.
+      </p>
+
+      <h2>1. Dados coletados</h2>
+      <p>
+        Nenhum. O conector não coleta dados pessoais, não tem telemetria nem analytics e não envia dados de uso para
+        nenhum lugar.
+      </p>
+
+      <h2>2. Como os dados são usados e guardados</h2>
+      <ul>
+        <li>
+          O conector lê e escreve arquivos e executa comandos <strong>somente quando o Claude pede</strong> pelas
+          ferramentas, e somente dentro das pastas que você libera (<code>allowed_roots</code>).
+        </li>
+        <li>
+          O resultado de cada ferramenta (saída de comandos, conteúdo de arquivos) volta para o aplicativo do Claude
+          na mesma máquina. A partir daí, o tratamento segue a política de privacidade da Anthropic, não a deste
+          conector.
+        </li>
+        <li>O conector não grava cópias desses dados.</li>
+      </ul>
+
+      <h2>3. Compartilhamento com terceiros</h2>
+      <p>
+        Nenhum. O conector não faz requisições de rede. A única exceção é opcional e configurada por você: com a
+        variável <code>WSL_CONNECTOR_PREWARM</code>, ele roda <code>npx</code> para baixar do registro do npm os
+        pacotes que você listar. Nenhum dado seu vai junto nessa operação.
+      </p>
+
+      <h2>4. Retenção</h2>
+      <p>
+        O estado das sessões de terminal (pasta atual e variáveis exportadas) fica só na memória do processo e
+        some quando a sessão fecha ou o conector encerra. Nada é guardado depois disso.
+      </p>
+
+      <h2>5. Seus controles</h2>
+      <ul>
+        <li>Você escolhe quais pastas o conector pode acessar.</li>
+        <li>O aplicativo do Claude pode pedir sua confirmação antes de cada ferramenta.</li>
+        <li>Você pode desinstalar o conector a qualquer momento; ele não deixa dados para trás.</li>
+      </ul>
+
+      <h2>6. Crianças</h2>
+      <p>O conector não é direcionado a menores de 18 anos.</p>
+
+      <h2>7. Mudanças</h2>
+      <p>
+        Mudanças nesta política são publicadas nesta página e no
+        <a href="https://github.com/denerbatista/conector-wsl">repositório do projeto</a>, com a data atualizada.
+      </p>
+
+      <h2>8. Contato</h2>
+      <p>
+        Responsável: Dener Batista. Para dúvidas sobre privacidade,
+        <a href="https://github.com/denerbatista/conector-wsl/issues">abra uma issue no GitHub</a>.
+      </p>
+
+      <h2 id="english">English summary</h2>
+      <p>
+        The WSL + Windows Workspace Connector runs entirely on your computer and talks to the Claude app over local
+        stdio. <strong>Data collection:</strong> none; no telemetry or analytics. <strong>Use and storage:</strong> it
+        reads and writes files and runs commands only when Claude calls its tools, and only inside the folders you
+        allow; results go back to the local Claude app and are not stored by the connector.
+        <strong>Third-party sharing:</strong> none; it makes no network requests (the only exception is the optional
+        <code>WSL_CONNECTOR_PREWARM</code> setting, which runs <code>npx</code> to fetch packages you list, without
+        sending your data). <strong>Retention:</strong> session state lives only in process memory and is discarded when
+        the session or the connector ends. <strong>Contact:</strong> Dener Batista, via
+        <a href="https://github.com/denerbatista/conector-wsl/issues">GitHub issues</a>.
+      </p>
+
+      <footer>
+        Desenvolvido por <a href="https://github.com/denerbatista">Dener Batista</a> · Licença MIT ·
+        <a href="index.html">Documentação</a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -26,7 +26,11 @@ export function registerTerminalTools(server, ctx) {
       cwd: z.string().min(1).optional(),
       timeoutMs: z.number().int().positive().max(600000).optional(),
     },
-    { readOnlyHint: false, destructiveHint: true },
+    {
+      title: "Executar comando no WSL",
+      readOnlyHint: false,
+      destructiveHint: true,
+    },
     async ({ command, cwd, timeoutMs }) => {
       const resolvedCwd = resolveCwd(cwd, ctx);
       const result = await executeBashScript({

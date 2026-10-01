@@ -1,6 +1,6 @@
 {
   "name": "claude-wsl-terminal-connector",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "MCP connector that exposes a controlled WSL terminal and filesystem to Claude/Cowork, with zero-config auto-detection.",
   "type": "module",
   "engines": {
@@ -11,6 +11,8 @@
     "claude-wsl-terminal-connector": "src/index.js"
   },
   "files": [
+    ".claude-plugin",
+    ".mcp.json",
     "src",
     "server",
     "scripts/postinstall.js",
@@ -32,7 +34,7 @@
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.json\" \"*.md\"",
     "package": "npm run bundle && bash scripts/pack.sh",
     "prepublishOnly": "npm run lint && npm test",
-    "version": "node scripts/sync-version.js && git add src/version.js manifest.json",
+    "version": "node scripts/sync-version.js && git add src/version.js manifest.json .claude-plugin/plugin.json",
     "bundle": "esbuild src/index.js --bundle --platform=node --target=node20 --format=esm --outfile=dist/wsl-connector.mjs --log-level=warning"
   },
   "keywords": [
@@ -59,5 +61,6 @@
     "eslint": "^9.18.0",
     "prettier": "^3.4.2",
     "vitest": "^2.1.8"
-  }
+  },
+  "homepage": "https://denerbatista.github.io/conector-wsl/"
 }

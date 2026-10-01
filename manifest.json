@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "claude-wsl-terminal-connector",
   "display_name": "WSL + Windows Workspace Connector",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Expoe terminal e filesystem do WSL e PowerShell do Windows para o Claude Desktop/Cowork via MCP, com auto-deteccao zero-config e modo silencioso para o Claude Code.",
   "long_description": "Conector MCP local que da ao Claude acesso controlado a sua maquina: executar comandos no WSL e no Windows (PowerShell), manter sessoes de terminal com cwd preservado, abrir arquivos/pastas/URLs no Windows e ler/escrever arquivos dentro das pastas liberadas. Detecta automaticamente a distro WSL, o usuario Linux e o usuario Windows, e libera /home/<linux-user> e /mnt/c/Users/<windows-user>. Quando o cliente e o Claude Code (que ja tem terminal proprio), entra em modo silencioso e registra so o status — pode ser carregado por um plugin sem gastar contexto.",
   "author": {
@@ -20,14 +20,14 @@
     "wsl"
   ],
   "homepage": "https://github.com/denerbatista/conector-wsl",
-  "documentation": "https://github.com/denerbatista/conector-wsl#readme",
+  "documentation": "https://denerbatista.github.io/conector-wsl/",
   "repository": {
     "type": "git",
     "url": "https://github.com/denerbatista/conector-wsl"
   },
   "license": "MIT",
   "privacy_policies": [
-    "https://github.com/denerbatista/conector-wsl#privacy-policy"
+    "https://denerbatista.github.io/conector-wsl/privacidade.html"
   ],
   "compatibility": {
     "platforms": ["win32", "linux"],

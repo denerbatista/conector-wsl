@@ -2,6 +2,19 @@
 
 Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.6.0] - 2026-10-01
+
+### Adicionado
+
+- **Plugin do Claude.** `.claude-plugin/plugin.json` e `.mcp.json` na raiz: o repositorio pode ser instalado e
+  publicado como plugin (o diretorio do Claude nao aceita mais extensoes `.mcpb` sozinhas).
+- **Documentacao e politica de privacidade no GitHub Pages** (`docs/`):
+  [documentacao](https://denerbatista.github.io/conector-wsl/) e
+  [privacidade](https://denerbatista.github.io/conector-wsl/privacidade.html). `manifest.json` aponta para elas.
+- `title` em todas as tools (anotacoes MCP), exigido pelo diretorio.
+- README: secao "O que o conector executa e acessa".
+- `sync-version` tambem atualiza a versao do `plugin.json`.
+
 ## [0.5.3] - 2026-09-03
 
 ### Adicionado
@@ -44,8 +57,8 @@ Todas as mudancas importantes ficam aqui. Segue [Keep a Changelog](https://keepa
   com `$c` vazio; `$HOME`, `$(...)` idem). Causa: o conector chamava `wsl.exe -d <distro> -- bash -lc
   <script>` e o `--` faz o wsl.exe repassar a linha ao **shell padrao da distro**, que expandia as
   variaveis e re-tokenizava as aspas antes do `bash -lc` receber o script. Agora usa `wsl.exe -d
-  <distro> --exec bash -lc <script>`: os argumentos chegam intactos ao bash. Reportado na auditoria
-  do plugin impacta-dev 0.5.3 (Cowork). Sem efeito em Linux nativo/WSL (usa `/bin/bash -lc`).
+  <distro> --exec bash -lc <script>`: os argumentos chegam intactos ao bash. Encontrado em uso no
+  Cowork. Sem efeito em Linux nativo/WSL (usa `/bin/bash -lc`).
 - `buildWslArgs` exportado e coberto por testes.
 - **Modo `auto` caia em `silent` no Cowork.** O Cowork (Claude Desktop) se identifica como
   `claude-code` no handshake MCP, igual ao CLI — o nome do cliente nao separa os dois. Agora a

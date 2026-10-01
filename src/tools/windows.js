@@ -61,7 +61,11 @@ export function registerWindowsTools(server, ctx) {
       cwd: z.string().min(1).optional(),
       timeoutMs: z.number().int().positive().max(600000).optional(),
     },
-    { readOnlyHint: false, destructiveHint: true },
+    {
+      title: "Executar comando no Windows",
+      readOnlyHint: false,
+      destructiveHint: true,
+    },
     async ({ command, cwd, timeoutMs }) => {
       const resolved = resolveWindowsCwd(cwd, ctx);
       const result = await runPs(ctx, {
@@ -93,7 +97,11 @@ export function registerWindowsTools(server, ctx) {
       cwd: z.string().min(1).optional(),
       label: z.string().min(1).max(80).optional(),
     },
-    { readOnlyHint: false, destructiveHint: false },
+    {
+      title: "Abrir sessao PowerShell",
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     async ({ cwd, label }) => {
       const resolved = resolveWindowsCwd(cwd, ctx);
       const session = makeWindowsSession({ cwd: resolved.windows, label });
@@ -121,7 +129,11 @@ export function registerWindowsTools(server, ctx) {
       command: z.string().min(1),
       timeoutMs: z.number().int().positive().max(600000).optional(),
     },
-    { readOnlyHint: false, destructiveHint: true },
+    {
+      title: "Executar na sessao PowerShell",
+      readOnlyHint: false,
+      destructiveHint: true,
+    },
     async ({ sessionId, command, timeoutMs }) => {
       const session = ctx.sessions.get(sessionId);
       if (!session) throw new Error(`Sessao nao encontrada: ${sessionId}`);
@@ -167,7 +179,11 @@ export function registerWindowsTools(server, ctx) {
     "close_windows_session",
     "Fecha uma sessao persistente do Windows e remove o estado salvo.",
     { sessionId: z.string().uuid() },
-    { readOnlyHint: false, destructiveHint: false },
+    {
+      title: "Fechar sessao PowerShell",
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     async ({ sessionId }) => {
       const session = ctx.sessions.get(sessionId);
       if (!session) throw new Error(`Sessao nao encontrada: ${sessionId}`);
@@ -183,7 +199,7 @@ export function registerWindowsTools(server, ctx) {
       target: z.string().min(1),
       app: z.string().min(1).optional(),
     },
-    { readOnlyHint: false, destructiveHint: false },
+    { title: "Abrir no Windows", readOnlyHint: false, destructiveHint: false },
     async ({ target, app }) => {
       let windowsTarget;
       if (isUrl(target)) {

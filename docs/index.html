@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Conector WSL</title>
+    <meta
+      name="description"
+      content="Documentação do WSL + Windows Workspace Connector: terminal e arquivos do WSL e PowerShell do Windows para o Claude."
+    />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="kicker">Documentação</div>
+        <h1>WSL + Windows Workspace Connector</h1>
+        <p class="lead">
+          Conector MCP local que dá ao Claude acesso controlado à sua máquina: terminal do WSL, PowerShell do
+          Windows, sessões persistentes e arquivos dentro das pastas que você libera.
+        </p>
+        <nav>
+          <a href="#instalar">Instalar</a>
+          <a href="#ferramentas">Ferramentas</a>
+          <a href="#configurar">Configurar</a>
+          <a href="#seguranca">Segurança</a>
+          <a href="privacidade.html">Privacidade</a>
+          <a href="#suporte">Suporte</a>
+        </nav>
+      </header>
+
+      <h2 id="o-que-faz">O que ele faz</h2>
+      <ul>
+        <li>Executa comandos no WSL (bash) e no Windows (PowerShell), avulsos ou em sessões que guardam a pasta atual.</li>
+        <li>Lê, escreve e lista arquivos, sempre dentro das pastas liberadas.</li>
+        <li>Abre arquivos, pastas e URLs no Windows com o app padrão.</li>
+        <li>
+          Detecta sozinho a distro WSL, o usuário Linux e o usuário Windows. Por padrão libera
+          <code>/home/&lt;usuário-linux&gt;</code> e <code>/mnt/c/Users/&lt;usuário-windows&gt;</code>.
+        </li>
+        <li>No Claude Code, que já tem terminal próprio, entra em modo silencioso e não gasta contexto.</li>
+      </ul>
+
+      <h2 id="instalar">Instalar</h2>
+      <h3>Requisitos</h3>
+      <ul>
+        <li>Windows 10 ou 11 com WSL 2 (ou Linux/WSL, sem as ferramentas de Windows).</li>
+        <li>Node.js 20 ou mais novo.</li>
+      </ul>
+
+      <h3>Como plugin do Claude (Cowork e Claude Code)</h3>
+      <p>
+        Instale o plugin <strong>conector-wsl</strong> pelo diretório de plugins do Claude. O plugin sobe o servidor
+        com <code>node ${CLAUDE_PLUGIN_ROOT}/src/index.js</code>, e o Claude instala as dependências
+        (<code>@modelcontextprotocol/sdk</code> e <code>zod</code>) a partir do <code>package-lock.json</code>.
+      </p>
+
+      <h3>Pelo npm</h3>
+      <pre><code>npm install -g claude-wsl-terminal-connector</code></pre>
+      <p>O instalador adiciona o conector ao Claude Desktop. Depois, reinicie o Claude Desktop.</p>
+
+      <h3>Pelo arquivo .mcpb</h3>
+      <p>
+        Baixe o <code>.mcpb</code> do
+        <a href="https://github.com/denerbatista/conector-wsl/releases/latest">release mais recente</a> e abra no
+        Claude Desktop em <strong>Settings › Extensions › Install from file</strong>.
+      </p>
+
+      <h2 id="ferramentas">Ferramentas</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Ferramenta</th><th>O que faz</th><th>Tipo</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>connector_status</code></td><td>Modo, distro, pastas liberadas e se o PowerShell está disponível.</td><td>leitura</td></tr>
+            <tr><td><code>list_allowed_roots</code></td><td>Lista as pastas liberadas.</td><td>leitura</td></tr>
+            <tr><td><code>list_directory</code></td><td>Lista arquivos e pastas.</td><td>leitura</td></tr>
+            <tr><td><code>get_path_info</code></td><td>Tipo, tamanho e datas de um caminho.</td><td>leitura</td></tr>
+            <tr><td><code>read_text_file</code></td><td>Lê um arquivo de texto (UTF-8).</td><td>leitura</td></tr>
+            <tr><td><code>write_text_file</code></td><td>Cria ou sobrescreve um arquivo de texto.</td><td>destrutiva</td></tr>
+            <tr><td><code>create_directory</code></td><td>Cria uma pasta.</td><td>escrita</td></tr>
+            <tr><td><code>run_wsl_command</code></td><td>Executa um comando no WSL em shell nova.</td><td>destrutiva</td></tr>
+            <tr><td><code>start_wsl_session</code></td><td>Abre uma sessão WSL que guarda pasta e variáveis exportadas.</td><td>escrita</td></tr>
+            <tr><td><code>run_in_wsl_session</code></td><td>Executa um comando dentro da sessão.</td><td>destrutiva</td></tr>
+            <tr><td><code>close_wsl_session</code></td><td>Fecha a sessão.</td><td>escrita</td></tr>
+            <tr><td><code>run_windows_command</code></td><td>Executa PowerShell no Windows em shell nova.</td><td>destrutiva</td></tr>
+            <tr><td><code>start_windows_session</code></td><td>Abre uma sessão PowerShell que guarda a pasta atual.</td><td>escrita</td></tr>
+            <tr><td><code>run_in_windows_session</code></td><td>Executa um comando dentro da sessão PowerShell.</td><td>destrutiva</td></tr>
+            <tr><td><code>close_windows_session</code></td><td>Fecha a sessão PowerShell.</td><td>escrita</td></tr>
+            <tr><td><code>open_in_windows</code></td><td>Abre arquivo, pasta ou URL no Windows.</td><td>escrita</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">
+        As ferramentas de Windows só aparecem quando o PowerShell é encontrado (Windows nativo ou WSL com interop).
+      </p>
+
+      <h2 id="exemplos">Exemplos de uso</h2>
+      <ul>
+        <li>“Rode <code>npm test</code> no projeto <code>~/myprojects/app</code> e me diga o que falhou.”</li>
+        <li>“Liste os arquivos da minha Área de Trabalho no Windows.”</li>
+        <li>“Abra uma sessão no WSL, entre em <code>~/site</code> e faça o build.”</li>
+        <li>“Abra o relatório <code>C:\Users\eu\Documents\relatorio.pdf</code>.”</li>
+      </ul>
+
+      <h2 id="configurar">Configurar (opcional)</h2>
+      <p>Tudo é detectado sozinho. Se quiser mudar, use estes campos (ou as variáveis de ambiente):</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Campo</th><th>Variável</th><th>Padrão</th></tr></thead>
+          <tbody>
+            <tr><td>Diretório inicial</td><td><code>WSL_CONNECTOR_DEFAULT_CWD</code></td><td><code>/home/&lt;usuário&gt;</code></td></tr>
+            <tr><td>Pastas liberadas</td><td><code>WSL_CONNECTOR_ALLOWED_ROOTS</code></td><td>home do WSL e pasta do usuário no Windows</td></tr>
+            <tr><td>Distro WSL</td><td><code>WSL_CONNECTOR_DISTRO</code></td><td>a distro padrão</td></tr>
+            <tr><td>Tempo limite</td><td><code>WSL_CONNECTOR_TIMEOUT_MS</code></td><td>120000 ms</td></tr>
+            <tr><td>Modo</td><td><code>WSL_CONNECTOR_MODE</code></td><td><code>auto</code> (full no Windows, silent no Claude Code em Linux)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="seguranca">Segurança e o que ele executa</h2>
+      <ul>
+        <li>Toda operação de arquivo e de terminal é validada contra as pastas liberadas. Caminhos fora delas são recusados.</li>
+        <li>Os comandos rodam com o seu usuário, com as mesmas permissões que você tem no terminal.</li>
+        <li>
+          Processos iniciados: <code>wsl.exe --exec bash -lc</code> (ou <code>/bin/bash -lc</code> no Linux) e
+          <code>powershell.exe</code>.
+        </li>
+        <li>
+          Nenhuma requisição de rede. A única exceção é opcional: com <code>WSL_CONNECTOR_PREWARM</code> definido, ele
+          roda <code>npx -y &lt;pacote@versão&gt; --help</code> para aquecer o cache do npm. O plugin não define essa
+          variável.
+        </li>
+        <li>Sem telemetria. Veja a <a href="privacidade.html">política de privacidade</a>.</li>
+      </ul>
+
+      <h2 id="limites">Limites conhecidos</h2>
+      <ul>
+        <li>Não há TTY interativo real (programas que pedem entrada no meio da execução não funcionam).</li>
+        <li>Sessões WSL guardam a pasta e as variáveis exportadas; aliases e funções não persistem.</li>
+        <li>Sessões PowerShell guardam só a pasta atual.</li>
+        <li>Arquivos são tratados como texto UTF-8.</li>
+      </ul>
+
+      <h2 id="suporte">Suporte</h2>
+      <p>
+        Dúvidas, bugs e sugestões:
+        <a href="https://github.com/denerbatista/conector-wsl/issues">abra uma issue no GitHub</a>. Código-fonte em
+        <a href="https://github.com/denerbatista/conector-wsl">github.com/denerbatista/conector-wsl</a>.
+      </p>
+
+      <footer>
+        Desenvolvido por <a href="https://github.com/denerbatista">Dener Batista</a> · Licença MIT ·
+        <a href="privacidade.html">Privacidade</a>
+      </footer>
+    </div>
+  </body>
+</html>

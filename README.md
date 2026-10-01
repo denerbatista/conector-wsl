@@ -17,9 +17,21 @@ Conector MCP local para Claude Desktop / Cowork que da ao Claude **acesso contro
 - **Dois lados, uma sandbox.** Comandos WSL (bash) e Windows (PowerShell) com a mesma lista de `allowed_roots`; caminhos podem ser `C:\...`, `\\wsl.localhost\...`, `/mnt/c/...` ou `/home/...`.
 - **Modo silencioso.** Detecta o Claude Code pelo handshake MCP e registra so o status — plugins podem declara-lo sem custo no CLI.
 
+Documentacao: [denerbatista.github.io/conector-wsl](https://denerbatista.github.io/conector-wsl/) · Politica de privacidade: [privacidade](https://denerbatista.github.io/conector-wsl/privacidade.html)
+
 ## Instalacao
 
-### Opcao 1 — Via npm (mais facil)
+### Opcao 1 — Plugin do Claude (Cowork / Claude Code)
+
+Instale o plugin **conector-wsl** pelo diretorio de plugins do Claude. Ele declara um servidor MCP local (`node ${CLAUDE_PLUGIN_ROOT}/src/index.js`) e o Claude instala as dependencias do `package-lock.json` (`@modelcontextprotocol/sdk` e `zod`). Precisa do Node.js 20 ou mais novo na maquina.
+
+Para testar a partir do repositorio no Claude Code:
+
+```bash
+claude --plugin-dir ./conector-wsl
+```
+
+### Opcao 2 — Via npm
 
 ```bash
 npm install -g claude-wsl-terminal-connector
@@ -29,7 +41,7 @@ O instalador detecta seu SO e ja adiciona o conector ao `claude_desktop_config.j
 
 Funciona em WSL, Windows nativo, macOS e Linux.
 
-### Opcao 2 — Claude Desktop / Cowork via .mcpb
+### Opcao 3 — Claude Desktop / Cowork via .mcpb
 
 1. Baixe `conector-wsl.mcpb` do [release mais recente](https://github.com/denerbatista/conector-wsl/releases/latest).
 2. Arraste para o Claude Desktop, ou abra **Settings → Extensions → Install from file**.
@@ -147,6 +159,17 @@ npm run package    # gera conector-wsl-X.Y.Z.mcpb
 
 Requisitos: Node 20+.
 
+## O que o conector executa e acessa
+
+Para voce saber exatamente o que roda na sua maquina:
+
+- **Processos que ele inicia:** `wsl.exe --exec bash -lc <comando>` (no Windows) ou `/bin/bash -lc <comando>` (no Linux/WSL) para as tools de WSL, e `powershell.exe` para as tools de Windows. Os comandos sao os que o Claude pede pelas tools, sempre com `cwd` dentro das `allowed_roots`.
+- **Arquivos:** le e escreve apenas dentro das `allowed_roots`. Caminhos fora delas sao recusados.
+- **Abrir no Windows:** `open_in_windows` usa o app padrao do Windows (ou o app informado) para abrir um arquivo, pasta ou URL que o Claude pedir.
+- **Rede:** o conector nao faz nenhuma requisicao de rede. A unica excecao e opcional: se voce definir `WSL_CONNECTOR_PREWARM`, ele roda `npx -y <pacote@versao> --help` para aquecer o cache do npm desses pacotes. O plugin nao define essa variavel.
+- **Instalacao via npm (Opcao 2):** o `postinstall` adiciona a entrada do conector ao `claude_desktop_config.json` do Claude Desktop; o `preuninstall` remove. Eles so agem em instalacao global (`npm install -g`); quando o plugin instala as dependencias, saem sem fazer nada.
+- **Telemetria:** nenhuma.
+
 ## Limites conhecidos
 
 - Nao cria TTY interativo real.
@@ -165,6 +188,8 @@ Este conector roda **inteiramente na sua maquina local**. Nao coleta, transmite 
 - **Retencao de dados**: Nenhum dado e persistido alem da sessao atual do Claude Desktop. O estado de sessao fica apenas em memoria.
 - **Acesso a rede**: Nenhum. O conector se comunica exclusivamente via stdio local com o Claude Desktop — nenhuma requisicao de rede e feita.
 - **Contato**: Para duvidas ou preocupacoes, abra uma issue em [github.com/denerbatista/conector-wsl](https://github.com/denerbatista/conector-wsl/issues).
+
+Versao completa: [denerbatista.github.io/conector-wsl/privacidade.html](https://denerbatista.github.io/conector-wsl/privacidade.html).
 
 ## Licenca
 
